@@ -1,0 +1,2666 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROADDAMAGE WATCH | ระบบรายงานถนนเสียหาย</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <style>
+        :root {
+            --bg-header: #0f2b3c;
+            --bg-main: #f0f4f8;
+            --bg-card: #ffffff;
+            --primary-blue: #0e7490;
+            --primary-blue-hover: #075b70;
+            --text-dark: #1e293b;
+            --text-gray: #64748b;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --danger-color: #dc2626;
+            --warning-color: #d97706;
+            --success-color: #059669;
+            --info-bg: #e0f2fe;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Prompt', 'Sarabun', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg-main);
+            color: var(--text-dark);
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        header {
+            background: var(--bg-header);
+            color: #ffffff;
+            padding: 12px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 5px rgba(15, 23, 42, 0.18);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 9px;
+            flex: 0 0 auto;
+        }
+
+        .logo-title h1 {
+            font-size: 18px;
+            line-height: 1.15;
+        }
+
+        .logo-title span {
+            display: block;
+            margin-top: 2px;
+            color: #cbd5e1;
+            font-size: 11px;
+        }
+
+        .header-date {
+            color: #cbd5e1;
+            font-size: 12px;
+            text-align: right;
+        }
+
+        .container {
+            width: min(1120px, 100%);
+            margin: 0 auto;
+            padding: 24px 16px 36px;
+        }
+
+        .page-header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .sub-header {
+            color: var(--primary-blue);
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .page-title-group h2 {
+            margin-top: 2px;
+            font-size: 27px;
+            line-height: 1.25;
+        }
+
+        .page-title-group p {
+            margin-top: 4px;
+            color: var(--text-gray);
+            font-size: 13px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding: 4px;
+            background: #dbe3ed;
+            border-radius: 18px;
+        }
+
+        .tab-btn {
+            border: 0;
+            padding: 7px 13px;
+            color: var(--text-gray);
+            background: transparent;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-dark);
+        }
+
+        .tab-btn.active {
+            background: #ffffff;
+            color: var(--text-dark);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 2.2fr) minmax(260px, 1fr);
+            gap: 20px;
+        }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card,
+        .content-card,
+        .action-card,
+        .summary-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.025);
+        }
+
+        .stat-card {
+            padding: 14px 16px;
+            border-radius: 12px;
+        }
+
+        .stat-card .label {
+            color: var(--text-gray);
+            font-size: 11px;
+        }
+
+        .stat-card .value {
+            margin-top: 3px;
+            font-size: 27px;
+            font-weight: 700;
+        }
+
+        .danger-text { color: var(--danger-color); }
+        .warning-text { color: var(--warning-color); }
+        .info-text { color: var(--primary-blue); }
+        .success-text { color: var(--success-color); }
+
+        .content-card {
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+        }
+
+        .action-card {
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .action-card-icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 10px;
+            color: #e11d48;
+            background: #ffe4e6;
+            border-radius: 50%;
+        }
+
+        .action-card p {
+            margin-top: 7px;
+            color: var(--text-gray);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .card-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .card-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .btn-export,
+        .btn-secondary,
+        .btn-small {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: var(--primary-blue);
+            background: #ffffff;
+            font-size: 12px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .btn-export:hover,
+        .btn-secondary:hover,
+        .btn-small:hover {
+            background: #f0f9ff;
+            border-color: #7dd3fc;
+        }
+
+        .btn-primary-block {
+            display: block;
+            width: 100%;
+            margin-top: 12px;
+            padding: 10px 14px;
+            border: none;
+            color: #ffffff;
+            background: var(--primary-blue);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn-primary-block:hover {
+            background: var(--primary-blue-hover);
+        }
+
+        .btn-primary-block:disabled,
+        .btn-gps:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .search-input {
+            position: relative;
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .search-input i {
+            position: absolute;
+            top: 50%;
+            left: 12px;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .search-input input,
+        .select-input,
+        .form-control {
+            width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            outline: none;
+            background: #ffffff;
+            color: var(--text-dark);
+            font-size: 13px;
+        }
+
+        .search-input input {
+            padding: 9px 12px 9px 34px;
+        }
+
+        .select-input {
+            width: auto;
+            min-width: 164px;
+            padding: 9px 12px;
+        }
+
+        .search-input input:focus,
+        .select-input:focus,
+        .form-control:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(14, 116, 144, 0.1);
+        }
+
+        .report-item {
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: #ffffff;
+        }
+
+        .report-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .badge-highway {
+            align-self: flex-start;
+            display: inline-block;
+            padding: 3px 8px;
+            margin-bottom: 6px;
+            border-radius: 4px;
+            color: #0369a1;
+            background: #e0f2fe;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-status {
+            align-self: flex-start;
+            display: inline-block;
+            padding: 3px 8px;
+            margin-bottom: 7px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .badge-status.danger {
+            color: var(--danger-color);
+            background: #fef2f2;
+        }
+
+        .badge-status.warning {
+            color: var(--warning-color);
+            background: #fffbeb;
+        }
+
+        .badge-status.info {
+            color: var(--primary-blue);
+            background: #f0f9ff;
+        }
+
+        .badge-status.success {
+            color: var(--success-color);
+            background: #ecfdf5;
+        }
+
+        .report-title {
+            margin-bottom: 4px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .report-location {
+            margin-bottom: 10px;
+            color: var(--text-gray);
+            font-size: 12px;
+            line-height: 1.55;
+        }
+
+        .report-images {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            margin-bottom: 12px;
+            padding-bottom: 2px;
+        }
+
+        .report-img-thumb {
+            width: 96px;
+            height: 72px;
+            flex: 0 0 auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .report-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin-bottom: 12px;
+            color: var(--text-gray);
+            font-size: 11px;
+        }
+
+        .report-details span {
+            display: inline-flex;
+            align-items: flex-start;
+            gap: 5px;
+            padding: 5px 8px;
+            border-radius: 6px;
+            background: #f1f5f9;
+            line-height: 1.45;
+        }
+
+        .report-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding-top: 10px;
+            border-top: 1px solid #f1f5f9;
+            color: var(--text-muted);
+            font-size: 11px;
+        }
+
+        .report-footer a,
+        .action-links a {
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .action-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .form-section-title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding-bottom: 7px;
+            margin: 20px 0 12px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--primary-blue);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .form-grid-2,
+        .form-grid-3 {
+            display: grid;
+            gap: 12px;
+        }
+
+        .form-grid-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .form-grid-3 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .form-group {
+            margin-bottom: 13px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #334155;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .req {
+            color: var(--danger-color);
+        }
+
+        .form-control {
+            min-height: 39px;
+            padding: 8px 11px;
+        }
+
+        textarea.form-control {
+            min-height: 85px;
+            resize: vertical;
+        }
+
+        .btn-gps {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-height: 39px;
+            border: 0;
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: #ffffff;
+            background: var(--success-color);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .btn-gps:hover {
+            background: #047857;
+        }
+
+        .image-upload-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 172px;
+            padding: 14px;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            background: #f8fafc;
+            text-align: center;
+        }
+
+        .image-upload-card:hover {
+            border-color: var(--primary-blue);
+            background: #f0f9ff;
+        }
+
+        .upload-icon {
+            margin-bottom: 8px;
+            color: var(--primary-blue);
+            font-size: 30px;
+        }
+
+        .image-upload-card p {
+            color: var(--text-gray);
+            font-size: 12px;
+        }
+
+        .sub-text {
+            display: block;
+            margin-top: 3px;
+            color: var(--text-muted);
+            font-size: 10px;
+        }
+
+        .file-input-hidden {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .preview-slot-container {
+            position: relative;
+            display: none;
+            width: 100%;
+        }
+
+        .preview-slot-container img {
+            width: 100%;
+            height: 145px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .btn-remove-img {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            z-index: 4;
+            width: 25px;
+            height: 25px;
+            border: none;
+            border-radius: 50%;
+            color: #ffffff;
+            background: var(--danger-color);
+            box-shadow: 0 2px 5px rgba(15, 23, 42, 0.24);
+        }
+
+        .compression-tag {
+            position: absolute;
+            bottom: 7px;
+            left: 7px;
+            max-width: calc(100% - 14px);
+            overflow: hidden;
+            border-radius: 5px;
+            padding: 3px 6px;
+            color: #ffffff;
+            background: rgba(15, 23, 42, 0.75);
+            font-size: 10px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .map-placeholder {
+            position: relative;
+            width: 100%;
+            height: 440px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+
+        #leaflet-map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-overlay-badge {
+            position: absolute;
+            z-index: 500;
+            top: 12px;
+            left: 12px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            color: var(--text-dark);
+            background: #ffffff;
+            box-shadow: 0 2px 5px rgba(15, 23, 42, 0.15);
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .traffic-score-card {
+            padding: 24px;
+            margin-bottom: 16px;
+            border-radius: 14px;
+            color: #ffffff;
+            background: var(--bg-header);
+            text-align: center;
+        }
+
+        .score-value {
+            margin: 10px 0;
+            font-size: 48px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .score-value span {
+            color: #94a3b8;
+            font-size: 18px;
+            font-weight: 400;
+        }
+
+        .progress-bar-bg {
+            height: 8px;
+            overflow: hidden;
+            margin-bottom: 7px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .progress-bar-fill {
+            width: 52%;
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444);
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            color: #cbd5e1;
+            font-size: 10px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .summary-card {
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .summary-card h4 {
+            color: var(--text-gray);
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .big-number {
+            margin-top: 3px;
+            color: var(--primary-blue);
+            font-size: 30px;
+            font-weight: 700;
+        }
+
+        .summary-card p {
+            margin-top: 2px;
+            color: var(--text-muted);
+            font-size: 10px;
+        }
+
+        .summary-table {
+            width: 100%;
+            min-width: 520px;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .summary-table th,
+        .summary-table td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        .summary-table th {
+            color: var(--text-dark);
+            background: #f8fafc;
+            font-weight: 600;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        .chat-box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 390px;
+            overflow-y: auto;
+            padding: 14px;
+            margin-bottom: 13px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+
+        .chat-bubble {
+            max-width: 86%;
+            padding: 10px 13px;
+            font-size: 12px;
+            line-height: 1.55;
+            white-space: pre-line;
+        }
+
+        .chat-bubble-ai {
+            align-self: flex-start;
+            border-radius: 12px 12px 12px 0;
+            color: #0369a1;
+            background: #e0f2fe;
+        }
+
+        .chat-bubble-user {
+            align-self: flex-end;
+            border-radius: 12px 12px 0 12px;
+            color: #ffffff;
+            background: var(--primary-blue);
+        }
+
+        .chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin-bottom: 14px;
+        }
+
+        .chip-btn {
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 6px 10px;
+            color: var(--text-dark);
+            background: #ffffff;
+            font-size: 11px;
+        }
+
+        .chip-btn:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            background: #f0f9ff;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input-wrapper input {
+            min-width: 0;
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            outline: none;
+            font-size: 12px;
+        }
+
+        .btn-send {
+            width: 43px;
+            flex: 0 0 43px;
+            border: 0;
+            border-radius: 8px;
+            color: #ffffff;
+            background: var(--primary-blue);
+        }
+
+        .btn-send:hover {
+            background: var(--primary-blue-hover);
+        }
+
+        .empty-state,
+        .loading-state,
+        .error-state {
+            padding: 30px 12px;
+            color: var(--text-muted);
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .error-state {
+            color: var(--danger-color);
+        }
+
+        .toast {
+            position: fixed;
+            z-index: 9999;
+            right: 18px;
+            bottom: 18px;
+            max-width: min(360px, calc(100vw - 36px));
+            padding: 12px 15px;
+            border-radius: 10px;
+            color: #ffffff;
+            background: #0f172a;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.24);
+            font-size: 12px;
+            line-height: 1.5;
+            transform: translateY(18px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: var(--success-color);
+        }
+
+        .toast.error {
+            background: var(--danger-color);
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 700px) {
+            header {
+                padding: 10px 13px;
+            }
+
+            .header-date {
+                display: none;
+            }
+
+            .container {
+                padding: 14px 10px 28px;
+            }
+
+            .page-header-container {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .page-title-group h2 {
+                font-size: 22px;
+            }
+
+            .nav-tabs {
+                width: 100%;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                border-radius: 12px;
+            }
+
+            .tab-btn {
+                min-height: 37px;
+                padding: 6px 4px;
+                font-size: 11px;
+                line-height: 1.25;
+            }
+
+            .tab-btn:last-child {
+                grid-column: 1 / -1;
+            }
+
+            .stats-cards {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+
+            .stat-card {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 11px 13px;
+            }
+
+            .stat-card .value {
+                margin: 0;
+                font-size: 23px;
+            }
+
+            .content-card,
+            .action-card {
+                padding: 14px;
+                border-radius: 12px;
+            }
+
+            .card-header-flex {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .card-actions,
+            .btn-export,
+            .btn-secondary {
+                width: 100%;
+            }
+
+            .btn-export,
+            .btn-secondary {
+                min-height: 37px;
+            }
+
+            .filter-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .search-input,
+            .select-input {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .select-input {
+                min-height: 39px;
+            }
+
+            .form-grid-2,
+            .form-grid-3 {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .btn-gps {
+                width: 100%;
+            }
+
+            .map-placeholder {
+                height: 330px;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .summary-card {
+                padding: 12px;
+            }
+
+            .big-number {
+                font-size: 26px;
+            }
+
+            .chip-group {
+                flex-direction: column;
+            }
+
+            .chip-btn {
+                width: 100%;
+                text-align: left;
+            }
+
+            .chat-bubble {
+                max-width: 94%;
+            }
+
+            .report-footer {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .report-details {
+                flex-direction: column;
+            }
+
+            .report-details span {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-section">
+            <div class="logo-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="logo-title">
+                <h1>ROADDAMAGE WATCH</h1>
+                <span>ระบบรายงานและติดตามจุดถนนเสียหาย</span>
+            </div>
+        </div>
+
+        <div class="header-date" id="header-date"></div>
+    </header>
+
+    <main class="container">
+        <div class="page-header-container">
+            <div class="page-title-group">
+                <div class="sub-header">ศูนย์ข้อมูลภาคสนาม</div>
+                <h2 id="page-main-title">สถานการณ์ถนนเสียหาย</h2>
+                <p id="page-sub-title">ติดตามจุดเสี่ยง หลุมบ่อ และข้อมูลทางเลี่ยงจากรายงานล่าสุด</p>
+            </div>
+
+            <nav class="nav-tabs">
+                <button class="tab-btn active" onclick="switchTab('tab-status', 'สถานการณ์ถนนเสียหาย', 'ติดตามจุดเสี่ยง หลุมบ่อ และข้อมูลทางเลี่ยงจากรายงานล่าสุด', this)">สถานการณ์</button>
+                <button class="tab-btn" onclick="switchTab('tab-map', 'แผนที่จุดถนนเสียหาย', 'ดูตำแหน่งของรายงานที่มีพิกัด GPS', this)">แผนที่</button>
+                <button class="tab-btn" onclick="switchTab('tab-traffic', 'จราจร Longdo', 'เปิดตรวจสอบสภาพจราจรแบบเรียลไทม์', this)">จราจร Longdo</button>
+                <button class="tab-btn" onclick="switchTab('tab-summary', 'รายงานสรุป', 'สรุปข้อมูลรายวันและภาพรวมตามจังหวัด', this)">รายงานสรุป</button>
+                <button class="tab-btn" onclick="switchTab('tab-record', 'แจ้งเหตุถนนเสียหาย', 'บันทึกข้อมูล ภาพถ่าย และพิกัดจุดชำรุด', this)">บันทึกจุด</button>
+                <button class="tab-btn" onclick="switchTab('tab-chat', 'ผู้ช่วยค้นเส้นทาง', 'สอบถามรายงานและทางเลี่ยงจากข้อมูลในระบบ', this)">ถามเส้นทาง</button>
+            </nav>
+        </div>
+
+        <section id="tab-status" class="tab-content active">
+            <div class="dashboard-layout">
+                <div>
+                    <div class="stats-cards">
+                        <div class="stat-card">
+                            <div class="label">เสี่ยงอันตรายสูง / ปิดทาง</div>
+                            <div class="value danger-text" id="stat-danger">0</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="label">ชำรุดปานกลาง / ชะลอตัว</div>
+                            <div class="value warning-text" id="stat-warning">0</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="label">กำลังซ่อมแซม / ปกติ</div>
+                            <div class="value info-text" id="stat-info">0</div>
+                        </div>
+                    </div>
+
+                    <div class="content-card">
+                        <div class="card-header-flex">
+                            <div class="card-title">
+                                <i class="fa-solid fa-road"></i>
+                                สถานการณ์ความเสียหายรายเส้นทาง
+                            </div>
+
+                            <div class="card-actions">
+                                <button class="btn-export" onclick="exportCSV()">
+                                    <i class="fa-solid fa-file-csv"></i> ส่งออก CSV
+                                </button>
+
+                                <button class="btn-export" onclick="loadReports()">
+                                    <i class="fa-solid fa-rotate"></i> รีเฟรช
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="filter-row">
+                            <div class="search-input">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input id="search-input" type="text" placeholder="ค้นหาทางหลวง อำเภอ จังหวัด หรือความเสียหาย" oninput="applyFilters()">
+                            </div>
+
+                            <select id="filter-status" class="select-input" onchange="applyFilters()">
+                                <option value="">ทุกระดับความเสียหาย</option>
+                                <option value="danger">เสี่ยงอันตรายสูง</option>
+                                <option value="warning">ชำรุดปานกลาง</option>
+                                <option value="info">กำลังซ่อมแซม</option>
+                                <option value="success">ซ่อมแซมเรียบร้อย</option>
+                            </select>
+
+                            <select id="filter-province" class="select-input" onchange="applyFilters()">
+                                <option value="">ทุกจังหวัด</option>
+                            </select>
+                        </div>
+
+                        <div id="reports-container">
+                            <div class="loading-state">
+                                <i class="fa-solid fa-spinner fa-spin"></i>
+                                กำลังโหลดข้อมูล...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <aside>
+                    <div class="action-card">
+                        <div class="action-card-icon">
+                            <i class="fa-solid fa-camera"></i>
+                        </div>
+
+                        <h3 style="font-size:15px;">แจ้งเหตุถนนเสียหาย</h3>
+
+                        <p>
+                            พบหลุมบ่อ ถนนทรุด คอสะพานชำรุด หรือเส้นทางเสี่ยง?
+                            บันทึกข้อมูลพร้อมภาพและพิกัดเพื่อแจ้งเตือนผู้ใช้รถ
+                        </p>
+
+                        <button class="btn-primary-block" onclick="switchTab('tab-record', 'แจ้งเหตุถนนเสียหาย', 'บันทึกข้อมูล ภาพถ่าย และพิกัดจุดชำรุด')">
+                            <i class="fa-solid fa-plus"></i> บันทึกจุดชำรุด
+                        </button>
+                    </div>
+
+                    <div class="content-card">
+                        <h3 class="card-title" style="margin-bottom:10px; font-size:14px;">
+                            <i class="fa-solid fa-phone-volume"></i> เบอร์ติดต่อฉุกเฉิน
+                        </h3>
+
+                        <ul style="list-style:none; color:var(--text-gray); font-size:12px; line-height:2.05;">
+                            <li><strong style="color:var(--text-dark);">1193</strong> — ตำรวจทางหลวง</li>
+                            <li><strong style="color:var(--text-dark);">1586</strong> — กรมทางหลวง</li>
+                            <li><strong style="color:var(--text-dark);">1146</strong> — กรมทางหลวงชนบท</li>
+                            <li><strong style="color:var(--text-dark);">1669</strong> — เจ็บป่วยฉุกเฉิน</li>
+                        </ul>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <section id="tab-map" class="tab-content">
+            <div class="content-card">
+                <div class="card-header-flex">
+                    <div class="card-title">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        แผนที่พิกัดจุดถนนเสียหาย
+                    </div>
+
+                    <div class="card-actions">
+                        <button class="btn-export" onclick="fitMapToMarkers()">
+                            <i class="fa-solid fa-compress"></i> แสดงทุกจุด
+                        </button>
+
+                        <button class="btn-export" onclick="loadReports()">
+                            <i class="fa-solid fa-rotate"></i> รีเฟรชข้อมูล
+                        </button>
+                    </div>
+                </div>
+
+                <div class="map-placeholder">
+                    <div class="map-overlay-badge">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span id="map-count">0 จุดบนแผนที่</span>
+                    </div>
+
+                    <div id="leaflet-map"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-traffic" class="tab-content">
+            <div class="traffic-score-card">
+                <div>ดัชนีรถติดภาพรวม (ตัวอย่าง)</div>
+                <div class="score-value">5.2 <span>/ 10</span></div>
+
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill"></div>
+                </div>
+
+                <div class="progress-labels">
+                    <span>คล่องตัว (0)</span>
+                    <span>ปานกลาง (5)</span>
+                    <span>ติดขัดมาก (10)</span>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-header-flex">
+                    <div class="card-title">
+                        <i class="fa-solid fa-chart-line"></i>
+                        ตรวจสอบสภาพการจราจร Longdo Traffic
+                    </div>
+
+                    <a class="btn-export" href="https://traffic.longdo.com/" target="_blank" rel="noopener noreferrer">
+                        เปิด Longdo Traffic
+                        <i class="fa-solid fa-up-right-from-square"></i>
+                    </a>
+                </div>
+
+                <p style="color:var(--text-gray); font-size:13px; line-height:1.7;">
+                    กดปุ่มด้านบนเพื่อเปิดหน้าสภาพจราจรของ Longdo ในแท็บใหม่
+                    แล้วตรวจสอบเส้นทางก่อนเดินทาง
+                </p>
+            </div>
+        </section>
+
+        <section id="tab-summary" class="tab-content">
+            <div class="content-card">
+                <div class="card-header-flex">
+                    <div class="card-title">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        รายงานสรุปสถานการณ์
+                    </div>
+
+                    <button class="btn-export" onclick="exportCSV()">
+                        <i class="fa-solid fa-file-csv"></i> ส่งออก CSV
+                    </button>
+                </div>
+
+                <div class="summary-grid" id="summary-grid"></div>
+
+                <h3 style="margin:18px 0 10px; color:var(--primary-blue); font-size:14px;">
+                    <i class="fa-solid fa-table"></i> สรุปตามจังหวัด
+                </h3>
+
+                <div class="table-wrap">
+                    <table class="summary-table" id="summary-table"></table>
+                </div>
+
+                <div style="margin-top:20px; border-top:1px solid var(--border-color); padding-top:15px;">
+                    <h3 style="margin-bottom:8px; color:var(--primary-blue); font-size:14px;">
+                        <i class="fa-solid fa-calendar-day"></i> รายงานประจำวัน
+                    </h3>
+
+                    <div id="daily-summary" style="color:var(--text-gray); font-size:12px; line-height:1.85;"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-record" class="tab-content">
+            <div class="content-card">
+                <h3 class="card-title">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    บันทึกข้อมูลจุดถนนชำรุดภาคสนาม
+                </h3>
+
+                <p style="margin-top:5px; color:var(--text-gray); font-size:12px;">
+                    ช่องที่มีเครื่องหมาย <span class="req">*</span> เป็นข้อมูลจำเป็น
+                </p>
+
+                <form id="damage-report-form" onsubmit="event.preventDefault(); submitForm();">
+                    <div class="form-section-title">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        1. What — เกิดอะไรขึ้น
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">สถานะถนน <span class="req">*</span></label>
+
+                            <select id="form-status" class="form-control" required>
+                                <option value="">-- เลือกสถานะถนน --</option>
+                                <option value="danger">ถนนทรุดตัวลึก / เสี่ยงอันตรายสูง (ปิดจราจร)</option>
+                                <option value="warning">หลุมบ่อขนาดใหญ่ / ผ่านได้ 1 ช่องทาง</option>
+                                <option value="warning-light">ผ่านได้เฉพาะรถใหญ่ (รถเล็กผ่านไม่ได้)</option>
+                                <option value="info">กำลังดำเนินการซ่อมแซม / ส่องสว่างไม่เพียงพอ</option>
+                                <option value="success">ซ่อมแซมเรียบร้อย / ผ่านได้ปกติ</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">รายละเอียดความเสียหาย</label>
+
+                            <input id="form-details-short" type="text" class="form-control" placeholder="เช่น หลุมบ่อลึก ไหล่ทางทรุด คอสะพานชำรุด">
+                        </div>
+                    </div>
+
+                    <div class="form-section-title">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        2. Where — เกิดที่ไหน
+                    </div>
+
+                    <div class="form-grid-3">
+                        <div class="form-group">
+                            <label class="form-label">หมายเลขทางหลวง <span class="req">*</span></label>
+                            <input id="form-highway" type="text" class="form-control" placeholder="เช่น 304, 33, 359" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">ช่วงกิโลเมตร <span class="req">*</span></label>
+                            <input id="form-km" type="text" class="form-control" placeholder="เช่น 168+200" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">จุดสังเกต <span class="req">*</span></label>
+                            <input id="form-landmark" type="text" class="form-control" placeholder="เช่น ช่วงทางลงเขาโทน" required>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">จังหวัด <span class="req">*</span></label>
+
+                            <select id="form-province" class="form-control" required>
+                                <option value="">-- เลือกจังหวัด --</option>
+                                <option>ปราจีนบุรี</option>
+                                <option>สระแก้ว</option>
+                                <option>ฉะเชิงเทรา</option>
+                                <option>นครราชสีมา</option>
+                                <option>นครนายก</option>
+                                <option>กรุงเทพมหานคร</option>
+                                <option>อื่น ๆ</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">อำเภอ/เขต <span class="req">*</span></label>
+                            <input id="form-district" type="text" class="form-control" placeholder="เช่น นาดี, กบินทร์บุรี" required>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-3" style="align-items:end;">
+                        <div class="form-group">
+                            <label class="form-label">ละติจูด (Latitude)</label>
+                            <input id="form-latitude" type="number" step="any" class="form-control" placeholder="เช่น 14.123456">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">ลองจิจูด (Longitude)</label>
+                            <input id="form-longitude" type="number" step="any" class="form-control" placeholder="เช่น 101.654321">
+                        </div>
+
+                        <div class="form-group">
+                            <button type="button" class="btn-gps" onclick="getGPSLocation(event)">
+                                <i class="fa-solid fa-location-crosshairs"></i>
+                                ดึง GPS ปัจจุบัน
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">ลิงก์แผนที่ (ถ้ามี)</label>
+                        <input id="form-maplink" type="url" class="form-control" placeholder="https://maps.google.com/?q=...">
+                    </div>
+
+                    <div class="form-section-title">
+                        <i class="fa-regular fa-clock"></i>
+                        3. When — พบเหตุเมื่อไร
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">วันและเวลาที่พบเหตุ</label>
+                        <input id="form-datetime" type="datetime-local" class="form-control">
+                    </div>
+
+                    <div class="form-section-title">
+                        <i class="fa-solid fa-user-shield"></i>
+                        4. Who — ผู้รายงานและผู้รับผิดชอบ
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">หน่วย / ผู้รายงาน <span class="req">*</span></label>
+                            <input id="form-reporter" type="text" class="form-control" placeholder="เช่น ส.ทล.5 กก.3 บก.ทล." required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">รถวิทยุ / สายตรวจ</label>
+                            <input id="form-radio" type="text" class="form-control" placeholder="เช่น 5301">
+                        </div>
+                    </div>
+
+                    <div class="form-section-title">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        5. Why — ผลกระทบและสภาพการจราจร
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">สภาพจราจร</label>
+
+                            <select id="form-traffic" class="form-control">
+                                <option value="คล่องตัว">คล่องตัว</option>
+                                <option value="ชะลอตัว">ชะลอตัว</option>
+                                <option value="รถสะสมมาก">รถสะสมมาก / ติดขัด</option>
+                                <option value="หยุดนิ่ง">ติดขัดหยุดนิ่ง</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">ความยาวท้ายแถว (กม.)</label>
+                            <input id="form-queue" type="number" min="0" step="0.1" class="form-control" placeholder="เช่น 1.5">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">รายละเอียดเพิ่มเติม / สาเหตุ / ข้อควรระวัง</label>
+                        <textarea id="form-details" class="form-control" placeholder="เช่น ไหล่ทางกัดเซาะลึกประมาณ 30 ซม. ปิดช่องทางซ้าย ควรลดความเร็ว..."></textarea>
+                    </div>
+
+                    <div class="form-section-title">
+                        <i class="fa-solid fa-route"></i>
+                        6. How — การจัดการและเส้นทางเลี่ยง
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">เส้นทางเลี่ยงที่ตรวจสอบแล้ว</label>
+                        <input id="form-alternative" type="text" class="form-control" placeholder="เช่น ใช้ ทล.33 เข้า ทล.359">
+                    </div>
+
+                    <div class="form-section-title">
+                        <i class="fa-solid fa-images"></i>
+                        ภาพถ่ายจุดชำรุด (แนบได้สูงสุด 2 ภาพ)
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">ภาพที่ 1 — มุมกว้าง / ภาพรวม</label>
+
+                            <div class="image-upload-card">
+                                <div id="placeholder-1">
+                                    <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                                    <p><strong>คลิกเพื่อเลือกภาพที่ 1</strong></p>
+                                    <span class="sub-text">JPG, PNG — ระบบบีบอัดอัตโนมัติ</span>
+                                </div>
+
+                                <input id="img-input-1" type="file" class="file-input-hidden" accept="image/*" onchange="processAndCompressImage(event, 1)">
+
+                                <div id="preview-slot-1" class="preview-slot-container">
+                                    <button type="button" class="btn-remove-img" onclick="removeImageSlot(1)" title="ลบภาพ">×</button>
+                                    <img id="img-preview-1" alt="ตัวอย่างภาพที่ 1">
+                                    <div id="comp-info-1" class="compression-tag"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">ภาพที่ 2 — มุมซูม / จุดเสียหาย</label>
+
+                            <div class="image-upload-card">
+                                <div id="placeholder-2">
+                                    <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                                    <p><strong>คลิกเพื่อเลือกภาพที่ 2</strong></p>
+                                    <span class="sub-text">JPG, PNG — ระบบบีบอัดอัตโนมัติ</span>
+                                </div>
+
+                                <input id="img-input-2" type="file" class="file-input-hidden" accept="image/*" onchange="processAndCompressImage(event, 2)">
+
+                                <div id="preview-slot-2" class="preview-slot-container">
+                                    <button type="button" class="btn-remove-img" onclick="removeImageSlot(2)" title="ลบภาพ">×</button>
+                                    <img id="img-preview-2" alt="ตัวอย่างภาพที่ 2">
+                                    <div id="comp-info-2" class="compression-tag"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="submit-report-btn" type="submit" class="btn-primary-block" style="padding:12px; margin-top:20px;">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        บันทึกรายงานเข้าสู่ระบบ
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <section id="tab-chat" class="tab-content">
+            <div class="content-card">
+                <div class="card-title" style="margin-bottom:12px;">
+                    <i class="fa-solid fa-robot"></i>
+                    ผู้ช่วยค้นหาเส้นทางและเช็กความเสียหาย
+                </div>
+
+                <div class="chip-group">
+                    <button class="chip-btn" onclick="sendQuickChat('ทางหลวง 304 ผ่านได้ไหม')">ทางหลวง 304 ผ่านได้ไหม?</button>
+                    <button class="chip-btn" onclick="sendQuickChat('มีจุดถนนทรุดที่ไหนบ้าง')">มีจุดถนนทรุดที่ไหนบ้าง?</button>
+                    <button class="chip-btn" onclick="sendQuickChat('เส้นทางไปนาดีเป็นอย่างไร')">เส้นทางไปนาดีเป็นอย่างไร?</button>
+                    <button class="chip-btn" onclick="sendQuickChat('แนะนำเส้นทางเลี่ยงไปสระแก้ว')">ทางเลี่ยงไปสระแก้ว</button>
+                </div>
+
+                <div class="chat-box" id="chat-box">
+                    <div class="chat-bubble chat-bubble-ai">
+สวัสดีครับ ผมช่วยค้นหาข้อมูลถนนชำรุดจากรายงานล่าสุดได้
+
+ลองถาม เช่น
+• “ทางหลวง 304 ผ่านได้ไหม”
+• “มีจุดถนนทรุดที่ไหนบ้าง”
+• “เส้นทางไปนาดีเป็นอย่างไร”
+                    </div>
+                </div>
+
+                <div class="chat-input-wrapper">
+                    <input id="chat-input" type="text" placeholder="พิมพ์คำถามเกี่ยวกับเส้นทาง..." onkeydown="if(event.key === 'Enter') sendChatMessage()">
+                    <button class="btn-send" onclick="sendChatMessage()" aria-label="ส่งข้อความ">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        /*
+         * สำคัญ: เปลี่ยน URL นี้เป็น Web App URL ของ Google Apps Script
+         * URL ต้องลงท้ายด้วย /exec
+         */
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxUH9FnohICztOgdlNwOQMSc0AY-AQbE5Nu9vRqn0oH2PO4dzgrEO2_bbmjxBtvIqA/exec';
+
+        let reports = [];
+        let filteredReports = [];
+        let compressedImages = {
+            slot1: null,
+            slot2: null
+        };
+
+        let map;
+        let mapMarkers = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('header-date').innerText = new Date().toLocaleDateString(
+                'th-TH',
+                {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                }
+            );
+
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+
+            document.getElementById('form-datetime').value =
+                now.toISOString().slice(0, 16);
+
+            initMap();
+            loadReports();
+        });
+
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+
+            toast.textContent = message;
+            toast.className = `toast ${type || ''} show`;
+
+            clearTimeout(window.toastTimer);
+
+            window.toastTimer = setTimeout(function() {
+                toast.classList.remove('show');
+            }, 3500);
+        }
+
+        function escapeHTML(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function formatThaiDate(value) {
+            if (!value) return '-';
+
+            const date = new Date(value);
+
+            if (Number.isNaN(date.getTime())) return String(value);
+
+            return date.toLocaleString('th-TH', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function normalizeStatus(status) {
+            if (status === 'warning-light') return 'warning';
+            return status || 'info';
+        }
+
+        function statusClass(status) {
+            return normalizeStatus(status);
+        }
+
+        function isValidCoordinate(lat, lng) {
+            return (
+                Number.isFinite(Number(lat)) &&
+                Number.isFinite(Number(lng)) &&
+                Number(lat) >= -90 &&
+                Number(lat) <= 90 &&
+                Number(lng) >= -180 &&
+                Number(lng) <= 180 &&
+                !(Number(lat) === 0 && Number(lng) === 0)
+            );
+        }
+
+        async function loadReports() {
+            const container = document.getElementById('reports-container');
+
+            container.innerHTML = `
+                <div class="loading-state">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    กำลังโหลดข้อมูลจาก Google Sheets...
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${API_URL}?action=list`, {
+                    method: 'GET',
+                    redirect: 'follow'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`ไม่สามารถเชื่อมต่อ API ได้ (${response.status})`);
+                }
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'โหลดข้อมูลไม่สำเร็จ');
+                }
+
+                reports = Array.isArray(data.reports) ? data.reports : [];
+                filteredReports = [...reports];
+
+                populateProvinceFilter();
+                applyFilters();
+                renderSummary();
+                refreshMapMarkers();
+            } catch (error) {
+                console.error(error);
+
+                container.innerHTML = `
+                    <div class="error-state">
+                        <i class="fa-solid fa-triangle-exclamation"></i><br>
+                        ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้<br>
+                        <span style="font-size:11px;">${escapeHTML(error.message)}</span>
+                    </div>
+                `;
+
+                showToast('โหลดข้อมูลจาก Google Sheets ไม่สำเร็จ', 'error');
+            }
+        }
+
+        function populateProvinceFilter() {
+            const select = document.getElementById('filter-province');
+            const selectedValue = select.value;
+
+            const provinces = [...new Set(
+                reports
+                    .map(function(report) {
+                        return report.province;
+                    })
+                    .filter(Boolean)
+            )].sort(function(a, b) {
+                return String(a).localeCompare(String(b), 'th');
+            });
+
+            select.innerHTML =
+                '<option value="">ทุกจังหวัด</option>' +
+                provinces.map(function(province) {
+                    return `<option value="${escapeHTML(province)}">${escapeHTML(province)}</option>`;
+                }).join('');
+
+            if (provinces.includes(selectedValue)) {
+                select.value = selectedValue;
+            }
+        }
+
+        function applyFilters() {
+            const keyword = document.getElementById('search-input').value
+                .trim()
+                .toLowerCase();
+
+            const wantedStatus = document.getElementById('filter-status').value;
+            const wantedProvince = document.getElementById('filter-province').value;
+
+            filteredReports = reports.filter(function(report) {
+                const searchable = [
+                    report.highway,
+                    report.km,
+                    report.landmark,
+                    report.province,
+                    report.district,
+                    report.statusText,
+                    report.details,
+                    report.alternative,
+                    report.reporter
+                ].join(' ').toLowerCase();
+
+                const keywordMatches = !keyword || searchable.includes(keyword);
+
+                const currentStatus = normalizeStatus(report.status);
+                const statusMatches =
+                    !wantedStatus || currentStatus === wantedStatus;
+
+                const provinceMatches =
+                    !wantedProvince || report.province === wantedProvince;
+
+                return keywordMatches && statusMatches && provinceMatches;
+            });
+
+            renderReports();
+            updateStats();
+        }
+
+        function renderReports() {
+            const container = document.getElementById('reports-container');
+
+            if (filteredReports.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-folder-open" style="font-size:28px;"></i>
+                        <p style="margin-top:8px;">ไม่พบรายงานตามเงื่อนไขที่ค้นหา</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredReports.map(function(report) {
+                const images = Array.isArray(report.images) ? report.images : [];
+                const currentStatus = normalizeStatus(report.status);
+                const mapUrl = report.mapLink ||
+                    (isValidCoordinate(report.latitude, report.longitude)
+                        ? `https://www.google.com/maps?q=${report.latitude},${report.longitude}`
+                        : 'https://maps.google.com');
+
+                const imagesHTML = images.length
+                    ? `
+                        <div class="report-images">
+                            ${images.map(function(image, index) {
+                                return `
+                                    <img
+                                        class="report-img-thumb"
+                                        src="${image}"
+                                        alt="ภาพรายงาน ${index + 1}"
+                                        onclick="openImage('${image}')"
+                                    >
+                                `;
+                            }).join('')}
+                        </div>
+                    `
+                    : '';
+
+                const queueText = Number(report.queue) > 0
+                    ? ` (ท้ายแถว ${escapeHTML(report.queue)} กม.)`
+                    : '';
+
+                return `
+                    <article class="report-item">
+                        <span class="badge-highway">ทางหลวง ${escapeHTML(report.highway)}</span>
+
+                        <span class="badge-status ${statusClass(currentStatus)}">
+                            ${escapeHTML(report.statusText)}
+                        </span>
+
+                        <div class="report-title">
+                            ทล.${escapeHTML(report.highway)} กม.${escapeHTML(report.km)}
+                        </div>
+
+                        <div class="report-location">
+                            <strong>Where:</strong> ${escapeHTML(report.landmark)}<br>
+                            อำเภอ/เขต ${escapeHTML(report.district)} · จ.${escapeHTML(report.province)}
+                        </div>
+
+                        <div class="report-details">
+                            <span>
+                                <i class="fa-regular fa-clock"></i>
+                                <strong>When:</strong> ${escapeHTML(formatThaiDate(report.timestamp))}
+                            </span>
+
+                            <span>
+                                <i class="fa-solid fa-user-shield"></i>
+                                <strong>Who:</strong> ${escapeHTML(report.reporter || '-')}
+                            </span>
+
+                            <span>
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                <strong>What:</strong> ${escapeHTML(report.statusText)}
+                            </span>
+
+                            <span>
+                                <i class="fa-solid fa-traffic-light"></i>
+                                <strong>Why/ผลกระทบ:</strong> ${escapeHTML(report.traffic || '-')}${queueText}
+                            </span>
+
+                            <span>
+                                <i class="fa-solid fa-route"></i>
+                                <strong>How/ทางเลี่ยง:</strong> ${escapeHTML(report.alternative || 'ยังไม่ระบุ')}
+                            </span>
+                        </div>
+
+                        ${report.details ? `
+                            <div style="margin:-3px 0 12px; color:var(--text-gray); font-size:12px; line-height:1.6;">
+                                <strong>รายละเอียด:</strong> ${escapeHTML(report.details)}
+                            </div>
+                        ` : ''}
+
+                        ${imagesHTML}
+
+                        <div class="report-footer">
+                            <div>
+                                <a href="${escapeHTML(mapUrl)}" target="_blank" rel="noopener noreferrer">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                    เปิดใน Google Maps
+                                </a>
+                            </div>
+
+                            <div class="action-links">
+                                <a href="#" onclick="copyReport('${report.id}'); return false;">
+                                    <i class="fa-regular fa-copy"></i> คัดลอก
+                                </a>
+
+                                <a href="#" onclick="resolveReport('${report.id}'); return false;">
+                                    <i class="fa-solid fa-circle-check"></i> แจ้งแก้ไขแล้ว
+                                </a>
+
+                                <a href="#" onclick="deleteReport('${report.id}'); return false;" style="color:var(--danger-color);">
+                                    <i class="fa-regular fa-trash-can"></i> ลบ
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            const danger = filteredReports.filter(function(report) {
+                return normalizeStatus(report.status) === 'danger';
+            }).length;
+
+            const warning = filteredReports.filter(function(report) {
+                return normalizeStatus(report.status) === 'warning';
+            }).length;
+
+            const info = filteredReports.filter(function(report) {
+                const status = normalizeStatus(report.status);
+                return status === 'info' || status === 'success';
+            }).length;
+
+            document.getElementById('stat-danger').textContent = danger;
+            document.getElementById('stat-warning').textContent = warning;
+            document.getElementById('stat-info').textContent = info;
+        }
+
+        async function callApi(action, payload) {
+            if (!API_URL || API_URL.includes('PASTE_YOUR')) {
+                throw new Error('กรุณาใส่ URL ของ Google Apps Script (/exec) ในตัวแปร API_URL ก่อน');
+            }
+
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                redirect: 'follow',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8'
+                },
+                body: JSON.stringify({
+                    action: action,
+                    payload: payload
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`API ทำงานไม่สำเร็จ (${response.status})`);
+            }
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.message || 'ดำเนินการไม่สำเร็จ');
+            }
+
+            return data;
+        }
+
+        async function submitForm() {
+            const statusSelect = document.getElementById('form-status');
+            const submitButton = document.getElementById('submit-report-btn');
+
+            const statusText = statusSelect.value
+                ? statusSelect.options[statusSelect.selectedIndex].text
+                : '';
+
+            const fullDetails = [
+                document.getElementById('form-details-short').value.trim(),
+                document.getElementById('form-details').value.trim()
+            ].filter(Boolean).join('\n');
+
+            const dateValue = document.getElementById('form-datetime').value;
+
+            const payload = {
+                highway: document.getElementById('form-highway').value.trim(),
+                km: document.getElementById('form-km').value.trim(),
+                landmark: document.getElementById('form-landmark').value.trim(),
+                province: document.getElementById('form-province').value,
+                district: document.getElementById('form-district').value.trim(),
+                status: statusSelect.value,
+                statusText: statusText,
+                reporter: document.getElementById('form-reporter').value.trim(),
+                radio: document.getElementById('form-radio').value.trim(),
+                traffic: document.getElementById('form-traffic').value,
+                queue: Number(document.getElementById('form-queue').value) || 0,
+                alternative: document.getElementById('form-alternative').value.trim(),
+                details: fullDetails,
+                latitude: Number(document.getElementById('form-latitude').value) || 0,
+                longitude: Number(document.getElementById('form-longitude').value) || 0,
+                mapLink: document.getElementById('form-maplink').value.trim(),
+                timestamp: dateValue
+                    ? new Date(dateValue).toISOString()
+                    : new Date().toISOString(),
+                images: [
+                    compressedImages.slot1,
+                    compressedImages.slot2
+                ].filter(Boolean)
+            };
+
+            const requiredFields = [
+                ['หมายเลขทางหลวง', payload.highway],
+                ['ช่วงกิโลเมตร', payload.km],
+                ['จุดสังเกต', payload.landmark],
+                ['จังหวัด', payload.province],
+                ['อำเภอ/เขต', payload.district],
+                ['สถานะถนน', payload.status],
+                ['หน่วย/ผู้รายงาน', payload.reporter]
+            ];
+
+            const missing = requiredFields.find(function(item) {
+                return !item[1];
+            });
+
+            if (missing) {
+                showToast(`กรุณากรอกข้อมูล: ${missing[0]}`, 'error');
+                return;
+            }
+
+            const originalContent = submitButton.innerHTML;
+
+            try {
+                submitButton.disabled = true;
+                submitButton.innerHTML =
+                    '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึกข้อมูล...';
+
+                await callApi('create', payload);
+
+                document.getElementById('damage-report-form').reset();
+                removeImageSlot(1);
+                removeImageSlot(2);
+
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                document.getElementById('form-datetime').value =
+                    now.toISOString().slice(0, 16);
+
+                showToast('บันทึกรายงานเข้าสู่ Google Sheets เรียบร้อยแล้ว', 'success');
+
+                await loadReports();
+
+                switchTab(
+                    'tab-status',
+                    'สถานการณ์ถนนเสียหาย',
+                    'ติดตามจุดเสี่ยง หลุมบ่อ และข้อมูลทางเลี่ยงจากรายงานล่าสุด'
+                );
+            } catch (error) {
+                console.error(error);
+                showToast(`บันทึกข้อมูลไม่สำเร็จ: ${error.message}`, 'error');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalContent;
+            }
+        }
+
+        async function deleteReport(id) {
+            const report = reports.find(function(item) {
+                return String(item.id) === String(id);
+            });
+
+            if (!report) {
+                showToast('ไม่พบรายการที่ต้องการลบ', 'error');
+                return;
+            }
+
+            const confirmed = confirm(
+                'ยืนยันการลบรายงานนี้หรือไม่?\n\n' +
+                `ทล.${report.highway} กม.${report.km}\n` +
+                `${report.landmark}\n` +
+                `อ.${report.district} จ.${report.province}`
+            );
+
+            if (!confirmed) return;
+
+            try {
+                await callApi('delete', { id: id });
+                showToast('ลบรายงานออกจาก Google Sheets เรียบร้อยแล้ว', 'success');
+                await loadReports();
+            } catch (error) {
+                console.error(error);
+                showToast(`ลบรายงานไม่สำเร็จ: ${error.message}`, 'error');
+            }
+        }
+
+        async function resolveReport(id) {
+            const report = reports.find(function(item) {
+                return String(item.id) === String(id);
+            });
+
+            if (!report) {
+                showToast('ไม่พบรายการที่ต้องการอัปเดต', 'error');
+                return;
+            }
+
+            const confirmed = confirm(
+                `ยืนยันว่า ทล.${report.highway} กม.${report.km}\n` +
+                'ซ่อมแซมเรียบร้อยและผ่านได้ปกติหรือไม่?'
+            );
+
+            if (!confirmed) return;
+
+            try {
+                await callApi('resolve', { id: id });
+                showToast('อัปเดตสถานะเป็น “ซ่อมแซมเรียบร้อย” แล้ว', 'success');
+                await loadReports();
+            } catch (error) {
+                console.error(error);
+                showToast(`อัปเดตสถานะไม่สำเร็จ: ${error.message}`, 'error');
+            }
+        }
+
+        function copyReport(id) {
+            const report = reports.find(function(item) {
+                return String(item.id) === String(id);
+            });
+
+            if (!report) return;
+
+            const text = [
+                `ทล.${report.highway} กม.${report.km}`,
+                `สถานะ: ${report.statusText}`,
+                `จุดสังเกต: ${report.landmark}`,
+                `อ.${report.district} จ.${report.province}`,
+                `เวลา: ${formatThaiDate(report.timestamp)}`,
+                `ผู้รายงาน: ${report.reporter || '-'}`,
+                `จราจร: ${report.traffic || '-'}${Number(report.queue) > 0 ? ` (ท้ายแถว ${report.queue} กม.)` : ''}`,
+                `ทางเลี่ยง: ${report.alternative || 'ยังไม่ระบุ'}`
+            ].join('\n');
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text)
+                    .then(function() {
+                        showToast('คัดลอกรายงานเรียบร้อยแล้ว', 'success');
+                    })
+                    .catch(function() {
+                        fallbackCopy(text);
+                    });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+
+            document.body.appendChild(textarea);
+            textarea.select();
+
+            try {
+                document.execCommand('copy');
+                showToast('คัดลอกรายงานเรียบร้อยแล้ว', 'success');
+            } catch (error) {
+                showToast('ไม่สามารถคัดลอกข้อความได้', 'error');
+            }
+
+            document.body.removeChild(textarea);
+        }
+
+        function getGPSLocation(event) {
+            if (!navigator.geolocation) {
+                showToast('อุปกรณ์หรือเบราว์เซอร์ไม่รองรับ GPS', 'error');
+                return;
+            }
+
+            const button = event.currentTarget;
+            const originalContent = button.innerHTML;
+
+            button.disabled = true;
+            button.innerHTML =
+                '<i class="fa-solid fa-spinner fa-spin"></i> กำลังหาพิกัด...';
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    document.getElementById('form-latitude').value =
+                        position.coords.latitude.toFixed(6);
+
+                    document.getElementById('form-longitude').value =
+                        position.coords.longitude.toFixed(6);
+
+                    button.disabled = false;
+                    button.innerHTML = originalContent;
+
+                    showToast('ดึงพิกัด GPS เรียบร้อยแล้ว', 'success');
+                },
+                function(error) {
+                    button.disabled = false;
+                    button.innerHTML = originalContent;
+
+                    let message = 'ไม่สามารถดึงพิกัด GPS ได้';
+
+                    if (error.code === error.PERMISSION_DENIED) {
+                        message = 'ไม่ได้รับอนุญาตให้เข้าถึงตำแหน่ง GPS';
+                    } else if (error.code === error.TIMEOUT) {
+                        message = 'หมดเวลาค้นหาตำแหน่ง GPS';
+                    }
+
+                    showToast(message, 'error');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        function processAndCompressImage(event, slotNumber) {
+            const file = event.target.files[0];
+
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                showToast('กรุณาเลือกไฟล์รูปภาพเท่านั้น', 'error');
+                return;
+            }
+
+            const originalSizeKB = (file.size / 1024).toFixed(1);
+            const reader = new FileReader();
+
+            reader.onload = function(readerEvent) {
+                const image = new Image();
+
+                image.onload = function() {
+                    const maxDimension = 1200;
+                    let width = image.width;
+                    let height = image.height;
+
+                    if (width > height && width > maxDimension) {
+                        height = Math.round(height * (maxDimension / width));
+                        width = maxDimension;
+                    } else if (height >= width && height > maxDimension) {
+                        width = Math.round(width * (maxDimension / height));
+                        height = maxDimension;
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const context = canvas.getContext('2d');
+                    context.drawImage(image, 0, 0, width, height);
+
+                    const dataURL = canvas.toDataURL('image/jpeg', 0.72);
+                    const compressedSizeKB = (dataURL.length * 0.75 / 1024).toFixed(1);
+
+                    compressedImages[`slot${slotNumber}`] = dataURL;
+
+                    document.getElementById(`placeholder-${slotNumber}`).style.display = 'none';
+                    document.getElementById(`img-preview-${slotNumber}`).src = dataURL;
+                    document.getElementById(`preview-slot-${slotNumber}`).style.display = 'block';
+
+                    document.getElementById(`comp-info-${slotNumber}`).innerHTML =
+                        `<i class="fa-solid fa-bolt"></i> ${compressedSizeKB} KB จาก ${originalSizeKB} KB`;
+                };
+
+                image.src = readerEvent.target.result;
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function removeImageSlot(slotNumber) {
+            compressedImages[`slot${slotNumber}`] = null;
+
+            document.getElementById(`img-input-${slotNumber}`).value = '';
+            document.getElementById(`img-preview-${slotNumber}`).src = '';
+            document.getElementById(`preview-slot-${slotNumber}`).style.display = 'none';
+            document.getElementById(`placeholder-${slotNumber}`).style.display = 'block';
+        }
+
+        function initMap() {
+            map = L.map('leaflet-map').setView([14.1, 101.6], 8);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+        }
+
+        function refreshMapMarkers() {
+            if (!map) return;
+
+            mapMarkers.forEach(function(marker) {
+                map.removeLayer(marker);
+            });
+
+            mapMarkers = [];
+
+            const validReports = reports.filter(function(report) {
+                return isValidCoordinate(report.latitude, report.longitude);
+            });
+
+            validReports.forEach(function(report) {
+                const marker = L.marker([
+                    Number(report.latitude),
+                    Number(report.longitude)
+                ]).addTo(map);
+
+                marker.bindPopup(`
+                    <div style="font-family:Prompt,Sarabun,sans-serif; min-width:180px;">
+                        <strong>ทล.${escapeHTML(report.highway)} กม.${escapeHTML(report.km)}</strong><br>
+                        <span style="font-size:12px;">${escapeHTML(report.statusText)}</span><br>
+                        <span style="font-size:11px;">${escapeHTML(report.district)}, ${escapeHTML(report.province)}</span>
+                    </div>
+                `);
+
+                mapMarkers.push(marker);
+            });
+
+            document.getElementById('map-count').textContent =
+                `${validReports.length} จุดบนแผนที่`;
+        }
+
+        function fitMapToMarkers() {
+            if (!map) return;
+
+            if (mapMarkers.length === 0) {
+                showToast('ยังไม่มีรายงานที่มีพิกัด GPS', 'error');
+                return;
+            }
+
+            const group = L.featureGroup(mapMarkers);
+            map.fitBounds(group.getBounds().pad(0.15));
+        }
+
+        function renderSummary() {
+            const total = reports.length;
+
+            const danger = reports.filter(function(report) {
+                return normalizeStatus(report.status) === 'danger';
+            }).length;
+
+            const warning = reports.filter(function(report) {
+                return normalizeStatus(report.status) === 'warning';
+            }).length;
+
+            const finished = reports.filter(function(report) {
+                return normalizeStatus(report.status) === 'success';
+            }).length;
+
+            const todayKey = new Date().toDateString();
+
+            const today = reports.filter(function(report) {
+                const reportDate = new Date(report.timestamp);
+                return !Number.isNaN(reportDate.getTime()) &&
+                    reportDate.toDateString() === todayKey;
+            }).length;
+
+            document.getElementById('summary-grid').innerHTML = `
+                <div class="summary-card">
+                    <h4>รายงานทั้งหมด</h4>
+                    <div class="big-number">${total}</div>
+                    <p>ทุกสถานะ</p>
+                </div>
+
+                <div class="summary-card">
+                    <h4>เสี่ยงอันตรายสูง</h4>
+                    <div class="big-number danger-text">${danger}</div>
+                    <p>ควรเฝ้าระวัง</p>
+                </div>
+
+                <div class="summary-card">
+                    <h4>ชำรุดปานกลาง</h4>
+                    <div class="big-number warning-text">${warning}</div>
+                    <p>อาจชะลอตัว</p>
+                </div>
+
+                <div class="summary-card">
+                    <h4>ซ่อมแซมเรียบร้อย</h4>
+                    <div class="big-number success-text">${finished}</div>
+                    <p>เปิดผ่านปกติ</p>
+                </div>
+            `;
+
+            const provinceStats = {};
+
+            reports.forEach(function(report) {
+                const province = report.province || 'ไม่ระบุจังหวัด';
+
+                if (!provinceStats[province]) {
+                    provinceStats[province] = {
+                        total: 0,
+                        danger: 0,
+                        warning: 0,
+                        info: 0,
+                        success: 0
+                    };
+                }
+
+                provinceStats[province].total += 1;
+                provinceStats[province][normalizeStatus(report.status)] += 1;
+            });
+
+            const sortedProvinces = Object.keys(provinceStats).sort(function(a, b) {
+                return provinceStats[b].total - provinceStats[a].total;
+            });
+
+            document.getElementById('summary-table').innerHTML = `
+                <thead>
+                    <tr>
+                        <th>จังหวัด</th>
+                        <th>ทั้งหมด</th>
+                        <th>อันตรายสูง</th>
+                        <th>ชำรุดปานกลาง</th>
+                        <th>กำลังซ่อม</th>
+                        <th>ซ่อมแล้ว</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    ${sortedProvinces.length ? sortedProvinces.map(function(province) {
+                        const stat = provinceStats[province];
+
+                        return `
+                            <tr>
+                                <td><strong>${escapeHTML(province)}</strong></td>
+                                <td>${stat.total}</td>
+                                <td class="danger-text">${stat.danger}</td>
+                                <td class="warning-text">${stat.warning}</td>
+                                <td class="info-text">${stat.info}</td>
+                                <td class="success-text">${stat.success}</td>
+                            </tr>
+                        `;
+                    }).join('') : `
+                        <tr>
+                            <td colspan="6" style="text-align:center; color:var(--text-muted);">
+                                ยังไม่มีข้อมูล
+                            </td>
+                        </tr>
+                    `}
+                </tbody>
+            `;
+
+            document.getElementById('daily-summary').innerHTML = `
+                <p><strong>วันที่ ${new Date().toLocaleDateString('th-TH', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                })}</strong></p>
+
+                <p>• รายงานใหม่วันนี้: <strong>${today}</strong> จุด</p>
+                <p>• จุดเสี่ยงอันตรายสูง: <strong class="danger-text">${danger}</strong> จุด</p>
+                <p>• จุดชำรุดปานกลาง: <strong class="warning-text">${warning}</strong> จุด</p>
+                <p>• รายงานทั้งหมดในระบบ: <strong>${total}</strong> จุด</p>
+            `;
+        }
+
+        function exportCSV() {
+            if (reports.length === 0) {
+                showToast('ไม่มีข้อมูลสำหรับส่งออก', 'error');
+                return;
+            }
+
+            const headers = [
+                'รหัสรายงาน',
+                'ทางหลวง',
+                'กิโลเมตร',
+                'จุดสังเกต',
+                'จังหวัด',
+                'อำเภอ/เขต',
+                'สถานะ',
+                'ผู้รายงาน',
+                'จราจร',
+                'ท้ายแถว(กม.)',
+                'ทางเลี่ยง',
+                'พิกัดละติจูด',
+                'พิกัดลองจิจูด',
+                'วันเวลา'
+            ];
+
+            const rows = reports.map(function(report) {
+                return [
+                    report.id,
+                    report.highway,
+                    report.km,
+                    report.landmark,
+                    report.province,
+                    report.district,
+                    report.statusText,
+                    report.reporter,
+                    report.traffic,
+                    report.queue,
+                    report.alternative,
+                    report.latitude,
+                    report.longitude,
+                    formatThaiDate(report.timestamp)
+                ];
+            });
+
+            const csv = [headers]
+                .concat(rows)
+                .map(function(row) {
+                    return row.map(function(cell) {
+                        const value = String(cell ?? '').replace(/"/g, '""');
+                        return `"${value}"`;
+                    }).join(',');
+                }).join('\n');
+
+            const blob = new Blob(
+                ['\uFEFF' + csv],
+                {
+                    type: 'text/csv;charset=utf-8;'
+                }
+            );
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+
+            link.href = url;
+            link.download = `roaddamage-report-${new Date().toISOString().slice(0, 10)}.csv`;
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            URL.revokeObjectURL(url);
+
+            showToast('ส่งออกไฟล์ CSV เรียบร้อยแล้ว', 'success');
+        }
+
+        function openImage(imageUrl) {
+            window.open(imageUrl, '_blank', 'noopener,noreferrer');
+        }
+
+        function switchTab(tabId, title, subtitle, element) {
+            document.querySelectorAll('.tab-content').forEach(function(tab) {
+                tab.classList.remove('active');
+            });
+
+            document.querySelectorAll('.tab-btn').forEach(function(button) {
+                button.classList.remove('active');
+            });
+
+            document.getElementById(tabId).classList.add('active');
+            document.getElementById('page-main-title').textContent = title;
+            document.getElementById('page-sub-title').textContent = subtitle;
+
+            if (element) {
+                element.classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn').forEach(function(button) {
+                    if ((button.getAttribute('onclick') || '').includes(tabId)) {
+                        button.classList.add('active');
+                    }
+                });
+            }
+
+            if (tabId === 'tab-map' && map) {
+                setTimeout(function() {
+                    map.invalidateSize();
+                    fitMapToMarkers();
+                }, 200);
+            }
+        }
+
+        function sendQuickChat(text) {
+            document.getElementById('chat-input').value = text;
+            sendChatMessage();
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const question = input.value.trim();
+
+            if (!question) return;
+
+            appendChatMessage(question, 'user');
+            input.value = '';
+
+            setTimeout(function() {
+                appendChatMessage(answerRouteQuestion(question), 'ai');
+            }, 350);
+        }
+
+        function appendChatMessage(message, sender) {
+            const box = document.getElementById('chat-box');
+            const bubble = document.createElement('div');
+
+            bubble.className = `chat-bubble chat-bubble-${sender}`;
+            bubble.textContent = message;
+
+            box.appendChild(bubble);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function answerRouteQuestion(question) {
+            const q = question.toLowerCase();
+
+            const matched = reports.filter(function(report) {
+                return [
+                    report.highway,
+                    report.province,
+                    report.district,
+                    report.landmark
+                ].join(' ').toLowerCase().includes(q.replace(/[?]/g, '').trim());
+            });
+
+            const highwayMatch = q.match(/\b\d{1,4}\b/);
+
+            if (highwayMatch) {
+                const highway = highwayMatch[0];
+
+                const highwayReports = reports.filter(function(report) {
+                    return String(report.highway) === highway;
+                });
+
+                if (highwayReports.length === 0) {
+                    return `ยังไม่พบรายงานความเสียหายของทางหลวง ${highway} ในระบบครับ`;
+                }
+
+                const dangerReports = highwayReports.filter(function(report) {
+                    return normalizeStatus(report.status) === 'danger';
+                });
+
+                let answer = `ทางหลวง ${highway} มีรายงาน ${highwayReports.length} จุด\n`;
+
+                if (dangerReports.length) {
+                    answer += `⚠️ พบจุดเสี่ยงอันตรายสูง ${dangerReports.length} จุด\n`;
+                }
+
+                highwayReports.slice(0, 4).forEach(function(report, index) {
+                    answer += `\n${index + 1}. กม.${report.km} ${report.landmark}\n`;
+                    answer += `   สถานะ: ${report.statusText}\n`;
+
+                    if (report.alternative) {
+                        answer += `   ทางเลี่ยง: ${report.alternative}\n`;
+                    }
+                });
+
+                return answer;
+            }
+
+            if (q.includes('ทรุด') || q.includes('อันตราย')) {
+                const dangerReports = reports.filter(function(report) {
+                    return normalizeStatus(report.status) === 'danger';
+                });
+
+                if (!dangerReports.length) {
+                    return 'ขณะนี้ยังไม่พบรายงานจุดเสี่ยงอันตรายสูงในระบบครับ';
+                }
+
+                return `พบจุดเสี่ยงอันตรายสูง ${dangerReports.length} จุด\n\n` +
+                    dangerReports.slice(0, 5).map(function(report, index) {
+                        return `${index + 1}. ทล.${report.highway} กม.${report.km} — ${report.landmark} (${report.province})`;
+                    }).join('\n');
+            }
+
+            if (q.includes('ทางเลี่ยง') || q.includes('เลี่ยง')) {
+                const withAlternative = reports.filter(function(report) {
+                    return report.alternative;
+                });
+
+                if (!withAlternative.length) {
+                    return 'ยังไม่มีข้อมูลเส้นทางเลี่ยงในระบบครับ';
+                }
+
+                return 'เส้นทางเลี่ยงที่มีข้อมูลในระบบ:\n\n' +
+                    withAlternative.slice(0, 5).map(function(report, index) {
+                        return `${index + 1}. ทล.${report.highway} กม.${report.km}: ${report.alternative}`;
+                    }).join('\n');
+            }
+
+            if (matched.length) {
+                return matched.slice(0, 4).map(function(report, index) {
+                    return `${index + 1}. ทล.${report.highway} กม.${report.km}\n` +
+                        `สถานะ: ${report.statusText}\n` +
+                        `พื้นที่: ${report.district}, ${report.province}\n` +
+                        `ทางเลี่ยง: ${report.alternative || 'ยังไม่ระบุ'}`;
+                }).join('\n\n');
+            }
+
+            return 'ลองสอบถามด้วยหมายเลขทางหลวง จังหวัด อำเภอ หรือคำว่า “ถนนทรุด” และ “ทางเลี่ยง” เช่น\n• ทางหลวง 304 ผ่านได้ไหม\n• มีจุดถนนทรุดที่ไหนบ้าง\n• ทางเลี่ยงไปสระแก้ว';
+        }
+    </script>
+</body>
+</html>
