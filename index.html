@@ -26,7 +26,6 @@
             --danger-color: #dc2626;
             --warning-color: #d97706;
             --success-color: #059669;
-            --info-bg: #e0f2fe;
         }
 
         * {
@@ -264,8 +263,7 @@
         }
 
         .btn-export,
-        .btn-secondary,
-        .btn-small {
+        .btn-secondary {
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -281,8 +279,7 @@
         }
 
         .btn-export:hover,
-        .btn-secondary:hover,
-        .btn-small:hover {
+        .btn-secondary:hover {
             background: #f0f9ff;
             border-color: #7dd3fc;
         }
@@ -1076,6 +1073,7 @@
             <div class="logo-icon">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
+
             <div class="logo-title">
                 <h1>ROADDAMAGE WATCH</h1>
                 <span>ระบบรายงานและติดตามจุดถนนเสียหาย</span>
@@ -1096,13 +1094,14 @@
             <nav class="nav-tabs">
                 <button class="tab-btn active" onclick="switchTab('tab-status', 'สถานการณ์ถนนเสียหาย', 'ติดตามจุดเสี่ยง หลุมบ่อ และข้อมูลทางเลี่ยงจากรายงานล่าสุด', this)">สถานการณ์</button>
                 <button class="tab-btn" onclick="switchTab('tab-map', 'แผนที่จุดถนนเสียหาย', 'ดูตำแหน่งของรายงานที่มีพิกัด GPS', this)">แผนที่</button>
-                <button class="tab-btn" onclick="switchTab('tab-traffic', 'จราจร Longdo', 'เปิดตรวจสอบสภาพจราจรแบบเรียลไทม์', this)">จราจร Longdo</button>
+                <button class="tab-btn" onclick="switchTab('tab-traffic', 'จราจร Longdo', 'เปิดตรวจสอบสภาพการจราจรแบบเรียลไทม์', this)">จราจร Longdo</button>
                 <button class="tab-btn" onclick="switchTab('tab-summary', 'รายงานสรุป', 'สรุปข้อมูลรายวันและภาพรวมตามจังหวัด', this)">รายงานสรุป</button>
                 <button class="tab-btn" onclick="switchTab('tab-record', 'แจ้งเหตุถนนเสียหาย', 'บันทึกข้อมูล ภาพถ่าย และพิกัดจุดชำรุด', this)">บันทึกจุด</button>
                 <button class="tab-btn" onclick="switchTab('tab-chat', 'ผู้ช่วยค้นเส้นทาง', 'สอบถามรายงานและทางเลี่ยงจากข้อมูลในระบบ', this)">ถามเส้นทาง</button>
             </nav>
         </div>
 
+        <!-- สถานการณ์ -->
         <section id="tab-status" class="tab-content active">
             <div class="dashboard-layout">
                 <div>
@@ -1203,6 +1202,7 @@
             </div>
         </section>
 
+        <!-- แผนที่ -->
         <section id="tab-map" class="tab-content">
             <div class="content-card">
                 <div class="card-header-flex">
@@ -1233,6 +1233,7 @@
             </div>
         </section>
 
+        <!-- จราจร Longdo -->
         <section id="tab-traffic" class="tab-content">
             <div class="traffic-score-card">
                 <div>ดัชนีรถติดภาพรวม (ตัวอย่าง)</div>
@@ -1263,12 +1264,13 @@
                 </div>
 
                 <p style="color:var(--text-gray); font-size:13px; line-height:1.7;">
-                    กดปุ่มด้านบนเพื่อเปิดหน้าสภาพจราจรของ Longdo ในแท็บใหม่
+                    กดปุ่มด้านบนเพื่อเปิดหน้าสภาพการจราจรของ Longdo ในแท็บใหม่
                     แล้วตรวจสอบเส้นทางก่อนเดินทาง
                 </p>
             </div>
         </section>
 
+        <!-- สรุป -->
         <section id="tab-summary" class="tab-content">
             <div class="content-card">
                 <div class="card-header-flex">
@@ -1302,6 +1304,7 @@
             </div>
         </section>
 
+        <!-- ฟอร์มบันทึก -->
         <section id="tab-record" class="tab-content">
             <div class="content-card">
                 <h3 class="card-title">
@@ -1314,9 +1317,11 @@
                 </p>
 
                 <form id="damage-report-form" onsubmit="event.preventDefault(); submitForm();">
+
+                    <!-- ลำดับ 1: What แต่ไม่แสดงคำว่า What -->
                     <div class="form-section-title">
                         <i class="fa-solid fa-circle-exclamation"></i>
-                        1. What — เกิดอะไรขึ้น
+                        1. สถานะและประเภทความเสียหาย
                     </div>
 
                     <div class="form-grid-2">
@@ -1334,15 +1339,15 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">รายละเอียดความเสียหาย</label>
-
+                            <label class="form-label">ลักษณะความเสียหายโดยย่อ</label>
                             <input id="form-details-short" type="text" class="form-control" placeholder="เช่น หลุมบ่อลึก ไหล่ทางทรุด คอสะพานชำรุด">
                         </div>
                     </div>
 
+                    <!-- ลำดับ 2: Where แต่ไม่แสดงคำว่า Where -->
                     <div class="form-section-title">
                         <i class="fa-solid fa-map-location-dot"></i>
-                        2. Where — เกิดที่ไหน
+                        2. ข้อมูลพื้นที่และพิกัดจุดเกิดเหตุ
                     </div>
 
                     <div class="form-grid-3">
@@ -1408,9 +1413,10 @@
                         <input id="form-maplink" type="url" class="form-control" placeholder="https://maps.google.com/?q=...">
                     </div>
 
+                    <!-- ลำดับ 3: When แต่ไม่แสดงคำว่า When -->
                     <div class="form-section-title">
                         <i class="fa-regular fa-clock"></i>
-                        3. When — พบเหตุเมื่อไร
+                        3. วันและเวลาที่พบเหตุ
                     </div>
 
                     <div class="form-group">
@@ -1418,9 +1424,10 @@
                         <input id="form-datetime" type="datetime-local" class="form-control">
                     </div>
 
+                    <!-- ลำดับ 4: Who แต่ไม่แสดงคำว่า Who -->
                     <div class="form-section-title">
                         <i class="fa-solid fa-user-shield"></i>
-                        4. Who — ผู้รายงานและผู้รับผิดชอบ
+                        4. ข้อมูลผู้รายงานและหน่วยปฏิบัติ
                     </div>
 
                     <div class="form-grid-2">
@@ -1435,9 +1442,10 @@
                         </div>
                     </div>
 
+                    <!-- ลำดับ 5: Why แต่ไม่แสดงคำว่า Why -->
                     <div class="form-section-title">
                         <i class="fa-solid fa-triangle-exclamation"></i>
-                        5. Why — ผลกระทบและสภาพการจราจร
+                        5. สภาพการจราจรและผลกระทบ
                     </div>
 
                     <div class="form-grid-2">
@@ -1463,9 +1471,10 @@
                         <textarea id="form-details" class="form-control" placeholder="เช่น ไหล่ทางกัดเซาะลึกประมาณ 30 ซม. ปิดช่องทางซ้าย ควรลดความเร็ว..."></textarea>
                     </div>
 
+                    <!-- ลำดับ 6: How แต่ไม่แสดงคำว่า How -->
                     <div class="form-section-title">
                         <i class="fa-solid fa-route"></i>
-                        6. How — การจัดการและเส้นทางเลี่ยง
+                        6. การดำเนินการและเส้นทางเลี่ยง
                     </div>
 
                     <div class="form-group">
@@ -1528,6 +1537,7 @@
             </div>
         </section>
 
+        <!-- ถามเส้นทาง -->
         <section id="tab-chat" class="tab-content">
             <div class="content-card">
                 <div class="card-title" style="margin-bottom:12px;">
@@ -1569,13 +1579,15 @@
 
     <script>
         /*
-         * สำคัญ: เปลี่ยน URL นี้เป็น Web App URL ของ Google Apps Script
-         * URL ต้องลงท้ายด้วย /exec
+         * สำคัญมาก:
+         * เปลี่ยน URL นี้เป็น Web App URL ของ Google Apps Script
+         * ต้องเป็น URL ที่ลงท้ายด้วย /exec
          */
         const API_URL = 'https://script.google.com/macros/s/AKfycbxUH9FnohICztOgdlNwOQMSc0AY-AQbE5Nu9vRqn0oH2PO4dzgrEO2_bbmjxBtvIqA/exec';
 
         let reports = [];
         let filteredReports = [];
+
         let compressedImages = {
             slot1: null,
             slot2: null
@@ -1585,25 +1597,27 @@
         let mapMarkers = [];
 
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('header-date').innerText = new Date().toLocaleDateString(
-                'th-TH',
-                {
+            document.getElementById('header-date').innerText =
+                new Date().toLocaleDateString('th-TH', {
                     weekday: 'long',
                     day: 'numeric',
                     month: 'long',
                     year: 'numeric'
-                }
-            );
+                });
 
+            setDefaultDateTime();
+            initMap();
+            loadReports();
+        });
+
+        function setDefaultDateTime() {
             const now = new Date();
+
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
 
             document.getElementById('form-datetime').value =
                 now.toISOString().slice(0, 16);
-
-            initMap();
-            loadReports();
-        });
+        }
 
         function showToast(message, type) {
             const toast = document.getElementById('toast');
@@ -1632,7 +1646,9 @@
 
             const date = new Date(value);
 
-            if (Number.isNaN(date.getTime())) return String(value);
+            if (Number.isNaN(date.getTime())) {
+                return String(value);
+            }
 
             return date.toLocaleString('th-TH', {
                 day: 'numeric',
@@ -1644,12 +1660,11 @@
         }
 
         function normalizeStatus(status) {
-            if (status === 'warning-light') return 'warning';
-            return status || 'info';
-        }
+            if (status === 'warning-light') {
+                return 'warning';
+            }
 
-        function statusClass(status) {
-            return normalizeStatus(status);
+            return status || 'info';
         }
 
         function isValidCoordinate(lat, lng) {
@@ -1675,6 +1690,10 @@
             `;
 
             try {
+                if (!API_URL || API_URL.includes('PASTE_YOUR')) {
+                    throw new Error('ยังไม่ได้กำหนด URL ของ Google Apps Script API');
+                }
+
                 const response = await fetch(`${API_URL}?action=list`, {
                     method: 'GET',
                     redirect: 'follow'
@@ -1714,7 +1733,7 @@
 
         function populateProvinceFilter() {
             const select = document.getElementById('filter-province');
-            const selectedValue = select.value;
+            const currentSelected = select.value;
 
             const provinces = [...new Set(
                 reports
@@ -1732,8 +1751,8 @@
                     return `<option value="${escapeHTML(province)}">${escapeHTML(province)}</option>`;
                 }).join('');
 
-            if (provinces.includes(selectedValue)) {
-                select.value = selectedValue;
+            if (provinces.includes(currentSelected)) {
+                select.value = currentSelected;
             }
         }
 
@@ -1760,12 +1779,13 @@
 
                 const keywordMatches = !keyword || searchable.includes(keyword);
 
-                const currentStatus = normalizeStatus(report.status);
                 const statusMatches =
-                    !wantedStatus || currentStatus === wantedStatus;
+                    !wantedStatus ||
+                    normalizeStatus(report.status) === wantedStatus;
 
                 const provinceMatches =
-                    !wantedProvince || report.province === wantedProvince;
+                    !wantedProvince ||
+                    report.province === wantedProvince;
 
                 return keywordMatches && statusMatches && provinceMatches;
             });
@@ -1784,16 +1804,27 @@
                         <p style="margin-top:8px;">ไม่พบรายงานตามเงื่อนไขที่ค้นหา</p>
                     </div>
                 `;
+
                 return;
             }
 
             container.innerHTML = filteredReports.map(function(report) {
-                const images = Array.isArray(report.images) ? report.images : [];
-                const currentStatus = normalizeStatus(report.status);
-                const mapUrl = report.mapLink ||
-                    (isValidCoordinate(report.latitude, report.longitude)
-                        ? `https://www.google.com/maps?q=${report.latitude},${report.longitude}`
-                        : 'https://maps.google.com');
+                const images = Array.isArray(report.images)
+                    ? report.images
+                    : [];
+
+                const status = normalizeStatus(report.status);
+
+                const mapLink = report.mapLink ||
+                    (
+                        isValidCoordinate(report.latitude, report.longitude)
+                            ? `https://www.google.com/maps?q=${report.latitude},${report.longitude}`
+                            : 'https://maps.google.com'
+                    );
+
+                const queueText = Number(report.queue) > 0
+                    ? ` (ท้ายแถว ${escapeHTML(report.queue)} กม.)`
+                    : '';
 
                 const imagesHTML = images.length
                     ? `
@@ -1812,57 +1843,60 @@
                     `
                     : '';
 
-                const queueText = Number(report.queue) > 0
-                    ? ` (ท้ายแถว ${escapeHTML(report.queue)} กม.)`
-                    : '';
-
                 return `
                     <article class="report-item">
-                        <span class="badge-highway">ทางหลวง ${escapeHTML(report.highway)}</span>
+                        <span class="badge-highway">
+                            ทางหลวง ${escapeHTML(report.highway)}
+                        </span>
 
-                        <span class="badge-status ${statusClass(currentStatus)}">
+                        <span class="badge-status ${status}">
                             ${escapeHTML(report.statusText)}
                         </span>
 
                         <div class="report-title">
-                            ทล.${escapeHTML(report.highway)} กม.${escapeHTML(report.km)}
+                            ทล.${escapeHTML(report.highway)}
+                            กม.${escapeHTML(report.km)}
                         </div>
 
                         <div class="report-location">
-                            <strong>Where:</strong> ${escapeHTML(report.landmark)}<br>
-                            อำเภอ/เขต ${escapeHTML(report.district)} · จ.${escapeHTML(report.province)}
+                            จุดสังเกต: ${escapeHTML(report.landmark)}<br>
+                            <strong>
+                                อำเภอ/เขต ${escapeHTML(report.district)}
+                                · จ.${escapeHTML(report.province)}
+                            </strong>
                         </div>
 
                         <div class="report-details">
                             <span>
                                 <i class="fa-regular fa-clock"></i>
-                                <strong>When:</strong> ${escapeHTML(formatThaiDate(report.timestamp))}
+                                ${escapeHTML(formatThaiDate(report.timestamp))}
                             </span>
 
                             <span>
                                 <i class="fa-solid fa-user-shield"></i>
-                                <strong>Who:</strong> ${escapeHTML(report.reporter || '-')}
+                                ผู้รายงาน: ${escapeHTML(report.reporter || '-')}
                             </span>
 
                             <span>
                                 <i class="fa-solid fa-triangle-exclamation"></i>
-                                <strong>What:</strong> ${escapeHTML(report.statusText)}
+                                ${escapeHTML(report.statusText)}
                             </span>
 
                             <span>
                                 <i class="fa-solid fa-traffic-light"></i>
-                                <strong>Why/ผลกระทบ:</strong> ${escapeHTML(report.traffic || '-')}${queueText}
+                                จราจร: ${escapeHTML(report.traffic || '-')}${queueText}
                             </span>
 
                             <span>
                                 <i class="fa-solid fa-route"></i>
-                                <strong>How/ทางเลี่ยง:</strong> ${escapeHTML(report.alternative || 'ยังไม่ระบุ')}
+                                ทางเลี่ยง: ${escapeHTML(report.alternative || 'ยังไม่ระบุ')}
                             </span>
                         </div>
 
                         ${report.details ? `
                             <div style="margin:-3px 0 12px; color:var(--text-gray); font-size:12px; line-height:1.6;">
-                                <strong>รายละเอียด:</strong> ${escapeHTML(report.details)}
+                                <strong>รายละเอียด:</strong>
+                                ${escapeHTML(report.details)}
                             </div>
                         ` : ''}
 
@@ -1870,7 +1904,7 @@
 
                         <div class="report-footer">
                             <div>
-                                <a href="${escapeHTML(mapUrl)}" target="_blank" rel="noopener noreferrer">
+                                <a href="${escapeHTML(mapLink)}" target="_blank" rel="noopener noreferrer">
                                     <i class="fa-solid fa-location-dot"></i>
                                     เปิดใน Google Maps
                                 </a>
@@ -1906,6 +1940,7 @@
 
             const info = filteredReports.filter(function(report) {
                 const status = normalizeStatus(report.status);
+
                 return status === 'info' || status === 'success';
             }).length;
 
@@ -1916,41 +1951,44 @@
 
         async function callApi(action, payload) {
             if (!API_URL || API_URL.includes('PASTE_YOUR')) {
-                throw new Error('กรุณาใส่ URL ของ Google Apps Script (/exec) ในตัวแปร API_URL ก่อน');
+                throw new Error('กรุณาใส่ URL Google Apps Script ที่ลงท้ายด้วย /exec ก่อน');
             }
 
-            const response = await fetch(API_URL, {
+            const requestData = {
+                action: action,
+                payload: payload
+            };
+
+            const formData = new FormData();
+
+            formData.append('payload', JSON.stringify(requestData));
+
+            /*
+             * ใช้ no-cors + FormData สำหรับ Apps Script Web App
+             * ช่วยหลีกเลี่ยง CORS preflight จาก GitHub Pages
+             * หลังส่งคำสั่งสำเร็จ จะโหลดข้อมูลจาก Google Sheets ใหม่
+             */
+            await fetch(API_URL, {
                 method: 'POST',
-                redirect: 'follow',
-                headers: {
-                    'Content-Type': 'text/plain;charset=utf-8'
-                },
-                body: JSON.stringify({
-                    action: action,
-                    payload: payload
-                })
+                mode: 'no-cors',
+                body: formData,
+                redirect: 'follow'
             });
 
-            if (!response.ok) {
-                throw new Error(`API ทำงานไม่สำเร็จ (${response.status})`);
-            }
+            return {
+                success: true
+            };
+        }
 
-            const data = await response.json();
-
-            if (!data.success) {
-                throw new Error(data.message || 'ดำเนินการไม่สำเร็จ');
-            }
-
-            return data;
+        function wait(milliseconds) {
+            return new Promise(function(resolve) {
+                setTimeout(resolve, milliseconds);
+            });
         }
 
         async function submitForm() {
             const statusSelect = document.getElementById('form-status');
             const submitButton = document.getElementById('submit-report-btn');
-
-            const statusText = statusSelect.value
-                ? statusSelect.options[statusSelect.selectedIndex].text
-                : '';
 
             const fullDetails = [
                 document.getElementById('form-details-short').value.trim(),
@@ -1966,7 +2004,9 @@
                 province: document.getElementById('form-province').value,
                 district: document.getElementById('form-district').value.trim(),
                 status: statusSelect.value,
-                statusText: statusText,
+                statusText: statusSelect.value
+                    ? statusSelect.options[statusSelect.selectedIndex].text
+                    : '',
                 reporter: document.getElementById('form-reporter').value.trim(),
                 radio: document.getElementById('form-radio').value.trim(),
                 traffic: document.getElementById('form-traffic').value,
@@ -1995,16 +2035,16 @@
                 ['หน่วย/ผู้รายงาน', payload.reporter]
             ];
 
-            const missing = requiredFields.find(function(item) {
+            const missingField = requiredFields.find(function(item) {
                 return !item[1];
             });
 
-            if (missing) {
-                showToast(`กรุณากรอกข้อมูล: ${missing[0]}`, 'error');
+            if (missingField) {
+                showToast(`กรุณากรอกข้อมูล: ${missingField[0]}`, 'error');
                 return;
             }
 
-            const originalContent = submitButton.innerHTML;
+            const originalButton = submitButton.innerHTML;
 
             try {
                 submitButton.disabled = true;
@@ -2013,18 +2053,20 @@
 
                 await callApi('create', payload);
 
+                await wait(1500);
+
                 document.getElementById('damage-report-form').reset();
+
                 removeImageSlot(1);
                 removeImageSlot(2);
-
-                const now = new Date();
-                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-                document.getElementById('form-datetime').value =
-                    now.toISOString().slice(0, 16);
-
-                showToast('บันทึกรายงานเข้าสู่ Google Sheets เรียบร้อยแล้ว', 'success');
+                setDefaultDateTime();
 
                 await loadReports();
+
+                showToast(
+                    'ส่งคำสั่งบันทึกรายงานแล้ว กรุณาตรวจสอบข้อมูลในรายการ',
+                    'success'
+                );
 
                 switchTab(
                     'tab-status',
@@ -2033,10 +2075,14 @@
                 );
             } catch (error) {
                 console.error(error);
-                showToast(`บันทึกข้อมูลไม่สำเร็จ: ${error.message}`, 'error');
+
+                showToast(
+                    `บันทึกข้อมูลไม่สำเร็จ: ${error.message}`,
+                    'error'
+                );
             } finally {
                 submitButton.disabled = false;
-                submitButton.innerHTML = originalContent;
+                submitButton.innerHTML = originalButton;
             }
         }
 
@@ -2057,15 +2103,27 @@
                 `อ.${report.district} จ.${report.province}`
             );
 
-            if (!confirmed) return;
+            if (!confirmed) {
+                return;
+            }
 
             try {
                 await callApi('delete', { id: id });
-                showToast('ลบรายงานออกจาก Google Sheets เรียบร้อยแล้ว', 'success');
+
+                await wait(1200);
                 await loadReports();
+
+                showToast(
+                    'ส่งคำสั่งลบรายงานแล้ว กรุณาตรวจสอบรายการ',
+                    'success'
+                );
             } catch (error) {
                 console.error(error);
-                showToast(`ลบรายงานไม่สำเร็จ: ${error.message}`, 'error');
+
+                showToast(
+                    `ลบรายงานไม่สำเร็จ: ${error.message}`,
+                    'error'
+                );
             }
         }
 
@@ -2084,15 +2142,27 @@
                 'ซ่อมแซมเรียบร้อยและผ่านได้ปกติหรือไม่?'
             );
 
-            if (!confirmed) return;
+            if (!confirmed) {
+                return;
+            }
 
             try {
                 await callApi('resolve', { id: id });
-                showToast('อัปเดตสถานะเป็น “ซ่อมแซมเรียบร้อย” แล้ว', 'success');
+
+                await wait(1200);
                 await loadReports();
+
+                showToast(
+                    'ส่งคำสั่งอัปเดตสถานะแล้ว กรุณาตรวจสอบรายการ',
+                    'success'
+                );
             } catch (error) {
                 console.error(error);
-                showToast(`อัปเดตสถานะไม่สำเร็จ: ${error.message}`, 'error');
+
+                showToast(
+                    `อัปเดตสถานะไม่สำเร็จ: ${error.message}`,
+                    'error'
+                );
             }
         }
 
@@ -2101,7 +2171,9 @@
                 return String(item.id) === String(id);
             });
 
-            if (!report) return;
+            if (!report) {
+                return;
+            }
 
             const text = [
                 `ทล.${report.highway} กม.${report.km}`,
@@ -2129,6 +2201,7 @@
 
         function fallbackCopy(text) {
             const textarea = document.createElement('textarea');
+
             textarea.value = text;
             textarea.style.position = 'fixed';
             textarea.style.opacity = '0';
@@ -2197,7 +2270,9 @@
         function processAndCompressImage(event, slotNumber) {
             const file = event.target.files[0];
 
-            if (!file) return;
+            if (!file) {
+                return;
+            }
 
             if (!file.type.startsWith('image/')) {
                 showToast('กรุณาเลือกไฟล์รูปภาพเท่านั้น', 'error');
@@ -2212,35 +2287,61 @@
 
                 image.onload = function() {
                     const maxDimension = 1200;
+
                     let width = image.width;
                     let height = image.height;
 
                     if (width > height && width > maxDimension) {
-                        height = Math.round(height * (maxDimension / width));
+                        height = Math.round(
+                            height * (maxDimension / width)
+                        );
+
                         width = maxDimension;
                     } else if (height >= width && height > maxDimension) {
-                        width = Math.round(width * (maxDimension / height));
+                        width = Math.round(
+                            width * (maxDimension / height)
+                        );
+
                         height = maxDimension;
                     }
 
                     const canvas = document.createElement('canvas');
+
                     canvas.width = width;
                     canvas.height = height;
 
                     const context = canvas.getContext('2d');
+
                     context.drawImage(image, 0, 0, width, height);
 
-                    const dataURL = canvas.toDataURL('image/jpeg', 0.72);
-                    const compressedSizeKB = (dataURL.length * 0.75 / 1024).toFixed(1);
+                    const dataURL = canvas.toDataURL(
+                        'image/jpeg',
+                        0.72
+                    );
+
+                    const compressedSizeKB = (
+                        dataURL.length * 0.75 / 1024
+                    ).toFixed(1);
 
                     compressedImages[`slot${slotNumber}`] = dataURL;
 
-                    document.getElementById(`placeholder-${slotNumber}`).style.display = 'none';
-                    document.getElementById(`img-preview-${slotNumber}`).src = dataURL;
-                    document.getElementById(`preview-slot-${slotNumber}`).style.display = 'block';
+                    document.getElementById(
+                        `placeholder-${slotNumber}`
+                    ).style.display = 'none';
 
-                    document.getElementById(`comp-info-${slotNumber}`).innerHTML =
-                        `<i class="fa-solid fa-bolt"></i> ${compressedSizeKB} KB จาก ${originalSizeKB} KB`;
+                    document.getElementById(
+                        `img-preview-${slotNumber}`
+                    ).src = dataURL;
+
+                    document.getElementById(
+                        `preview-slot-${slotNumber}`
+                    ).style.display = 'block';
+
+                    document.getElementById(
+                        `comp-info-${slotNumber}`
+                    ).innerHTML =
+                        `<i class="fa-solid fa-bolt"></i> ` +
+                        `${compressedSizeKB} KB จาก ${originalSizeKB} KB`;
                 };
 
                 image.src = readerEvent.target.result;
@@ -2252,23 +2353,42 @@
         function removeImageSlot(slotNumber) {
             compressedImages[`slot${slotNumber}`] = null;
 
-            document.getElementById(`img-input-${slotNumber}`).value = '';
-            document.getElementById(`img-preview-${slotNumber}`).src = '';
-            document.getElementById(`preview-slot-${slotNumber}`).style.display = 'none';
-            document.getElementById(`placeholder-${slotNumber}`).style.display = 'block';
+            document.getElementById(
+                `img-input-${slotNumber}`
+            ).value = '';
+
+            document.getElementById(
+                `img-preview-${slotNumber}`
+            ).src = '';
+
+            document.getElementById(
+                `preview-slot-${slotNumber}`
+            ).style.display = 'none';
+
+            document.getElementById(
+                `placeholder-${slotNumber}`
+            ).style.display = 'block';
         }
 
         function initMap() {
-            map = L.map('leaflet-map').setView([14.1, 101.6], 8);
+            map = L.map('leaflet-map').setView(
+                [14.1, 101.6],
+                8
+            );
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
+            L.tileLayer(
+                'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                {
+                    maxZoom: 19,
+                    attribution: '&copy; OpenStreetMap contributors'
+                }
+            ).addTo(map);
         }
 
         function refreshMapMarkers() {
-            if (!map) return;
+            if (!map) {
+                return;
+            }
 
             mapMarkers.forEach(function(marker) {
                 map.removeLayer(marker);
@@ -2277,7 +2397,10 @@
             mapMarkers = [];
 
             const validReports = reports.filter(function(report) {
-                return isValidCoordinate(report.latitude, report.longitude);
+                return isValidCoordinate(
+                    report.latitude,
+                    report.longitude
+                );
             });
 
             validReports.forEach(function(report) {
@@ -2288,9 +2411,17 @@
 
                 marker.bindPopup(`
                     <div style="font-family:Prompt,Sarabun,sans-serif; min-width:180px;">
-                        <strong>ทล.${escapeHTML(report.highway)} กม.${escapeHTML(report.km)}</strong><br>
-                        <span style="font-size:12px;">${escapeHTML(report.statusText)}</span><br>
-                        <span style="font-size:11px;">${escapeHTML(report.district)}, ${escapeHTML(report.province)}</span>
+                        <strong>
+                            ทล.${escapeHTML(report.highway)}
+                            กม.${escapeHTML(report.km)}
+                        </strong><br>
+                        <span style="font-size:12px;">
+                            ${escapeHTML(report.statusText)}
+                        </span><br>
+                        <span style="font-size:11px;">
+                            ${escapeHTML(report.district)},
+                            ${escapeHTML(report.province)}
+                        </span>
                     </div>
                 `);
 
@@ -2302,14 +2433,21 @@
         }
 
         function fitMapToMarkers() {
-            if (!map) return;
+            if (!map) {
+                return;
+            }
 
             if (mapMarkers.length === 0) {
-                showToast('ยังไม่มีรายงานที่มีพิกัด GPS', 'error');
+                showToast(
+                    'ยังไม่มีรายงานที่มีพิกัด GPS',
+                    'error'
+                );
+
                 return;
             }
 
             const group = L.featureGroup(mapMarkers);
+
             map.fitBounds(group.getBounds().pad(0.15));
         }
 
@@ -2332,8 +2470,11 @@
 
             const today = reports.filter(function(report) {
                 const reportDate = new Date(report.timestamp);
-                return !Number.isNaN(reportDate.getTime()) &&
-                    reportDate.toDateString() === todayKey;
+
+                return (
+                    !Number.isNaN(reportDate.getTime()) &&
+                    reportDate.toDateString() === todayKey
+                );
             }).length;
 
             document.getElementById('summary-grid').innerHTML = `
@@ -2366,6 +2507,7 @@
 
             reports.forEach(function(report) {
                 const province = report.province || 'ไม่ระบุจังหวัด';
+                const status = normalizeStatus(report.status);
 
                 if (!provinceStats[province]) {
                     provinceStats[province] = {
@@ -2378,12 +2520,17 @@
                 }
 
                 provinceStats[province].total += 1;
-                provinceStats[province][normalizeStatus(report.status)] += 1;
+
+                if (provinceStats[province][status] !== undefined) {
+                    provinceStats[province][status] += 1;
+                }
             });
 
-            const sortedProvinces = Object.keys(provinceStats).sort(function(a, b) {
-                return provinceStats[b].total - provinceStats[a].total;
-            });
+            const provinces = Object.keys(provinceStats).sort(
+                function(a, b) {
+                    return provinceStats[b].total - provinceStats[a].total;
+                }
+            );
 
             document.getElementById('summary-table').innerHTML = `
                 <thead>
@@ -2398,35 +2545,45 @@
                 </thead>
 
                 <tbody>
-                    ${sortedProvinces.length ? sortedProvinces.map(function(province) {
-                        const stat = provinceStats[province];
+                    ${provinces.length
+                        ? provinces.map(function(province) {
+                            const stat = provinceStats[province];
 
-                        return `
+                            return `
+                                <tr>
+                                    <td><strong>${escapeHTML(province)}</strong></td>
+                                    <td>${stat.total}</td>
+                                    <td class="danger-text">${stat.danger}</td>
+                                    <td class="warning-text">${stat.warning}</td>
+                                    <td class="info-text">${stat.info}</td>
+                                    <td class="success-text">${stat.success}</td>
+                                </tr>
+                            `;
+                        }).join('')
+                        : `
                             <tr>
-                                <td><strong>${escapeHTML(province)}</strong></td>
-                                <td>${stat.total}</td>
-                                <td class="danger-text">${stat.danger}</td>
-                                <td class="warning-text">${stat.warning}</td>
-                                <td class="info-text">${stat.info}</td>
-                                <td class="success-text">${stat.success}</td>
+                                <td colspan="6" style="text-align:center; color:var(--text-muted);">
+                                    ยังไม่มีข้อมูล
+                                </td>
                             </tr>
-                        `;
-                    }).join('') : `
-                        <tr>
-                            <td colspan="6" style="text-align:center; color:var(--text-muted);">
-                                ยังไม่มีข้อมูล
-                            </td>
-                        </tr>
-                    `}
+                        `
+                    }
                 </tbody>
             `;
 
             document.getElementById('daily-summary').innerHTML = `
-                <p><strong>วันที่ ${new Date().toLocaleDateString('th-TH', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                })}</strong></p>
+                <p>
+                    <strong>
+                        วันที่ ${new Date().toLocaleDateString(
+                            'th-TH',
+                            {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric'
+                            }
+                        )}
+                    </strong>
+                </p>
 
                 <p>• รายงานใหม่วันนี้: <strong>${today}</strong> จุด</p>
                 <p>• จุดเสี่ยงอันตรายสูง: <strong class="danger-text">${danger}</strong> จุด</p>
@@ -2481,7 +2638,9 @@
                 .concat(rows)
                 .map(function(row) {
                     return row.map(function(cell) {
-                        const value = String(cell ?? '').replace(/"/g, '""');
+                        const value = String(cell ?? '')
+                            .replace(/"/g, '""');
+
                         return `"${value}"`;
                     }).join(',');
                 }).join('\n');
@@ -2497,7 +2656,10 @@
             const link = document.createElement('a');
 
             link.href = url;
-            link.download = `roaddamage-report-${new Date().toISOString().slice(0, 10)}.csv`;
+            link.download =
+                `roaddamage-report-${new Date()
+                    .toISOString()
+                    .slice(0, 10)}.csv`;
 
             document.body.appendChild(link);
             link.click();
@@ -2513,32 +2675,48 @@
         }
 
         function switchTab(tabId, title, subtitle, element) {
-            document.querySelectorAll('.tab-content').forEach(function(tab) {
-                tab.classList.remove('active');
-            });
+            document.querySelectorAll('.tab-content').forEach(
+                function(tab) {
+                    tab.classList.remove('active');
+                }
+            );
 
-            document.querySelectorAll('.tab-btn').forEach(function(button) {
-                button.classList.remove('active');
-            });
+            document.querySelectorAll('.tab-btn').forEach(
+                function(button) {
+                    button.classList.remove('active');
+                }
+            );
 
             document.getElementById(tabId).classList.add('active');
-            document.getElementById('page-main-title').textContent = title;
-            document.getElementById('page-sub-title').textContent = subtitle;
+
+            document.getElementById('page-main-title').textContent =
+                title;
+
+            document.getElementById('page-sub-title').textContent =
+                subtitle;
 
             if (element) {
                 element.classList.add('active');
             } else {
-                document.querySelectorAll('.tab-btn').forEach(function(button) {
-                    if ((button.getAttribute('onclick') || '').includes(tabId)) {
-                        button.classList.add('active');
+                document.querySelectorAll('.tab-btn').forEach(
+                    function(button) {
+                        if (
+                            (button.getAttribute('onclick') || '')
+                                .includes(tabId)
+                        ) {
+                            button.classList.add('active');
+                        }
                     }
-                });
+                );
             }
 
             if (tabId === 'tab-map' && map) {
                 setTimeout(function() {
                     map.invalidateSize();
-                    fitMapToMarkers();
+
+                    if (mapMarkers.length > 0) {
+                        fitMapToMarkers();
+                    }
                 }, 200);
             }
         }
@@ -2552,38 +2730,35 @@
             const input = document.getElementById('chat-input');
             const question = input.value.trim();
 
-            if (!question) return;
+            if (!question) {
+                return;
+            }
 
             appendChatMessage(question, 'user');
+
             input.value = '';
 
             setTimeout(function() {
-                appendChatMessage(answerRouteQuestion(question), 'ai');
+                appendChatMessage(
+                    answerRouteQuestion(question),
+                    'ai'
+                );
             }, 350);
         }
 
         function appendChatMessage(message, sender) {
-            const box = document.getElementById('chat-box');
+            const chatBox = document.getElementById('chat-box');
             const bubble = document.createElement('div');
 
             bubble.className = `chat-bubble chat-bubble-${sender}`;
             bubble.textContent = message;
 
-            box.appendChild(bubble);
-            box.scrollTop = box.scrollHeight;
+            chatBox.appendChild(bubble);
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
         function answerRouteQuestion(question) {
             const q = question.toLowerCase();
-
-            const matched = reports.filter(function(report) {
-                return [
-                    report.highway,
-                    report.province,
-                    report.district,
-                    report.landmark
-                ].join(' ').toLowerCase().includes(q.replace(/[?]/g, '').trim());
-            });
 
             const highwayMatch = q.match(/\b\d{1,4}\b/);
 
@@ -2598,24 +2773,32 @@
                     return `ยังไม่พบรายงานความเสียหายของทางหลวง ${highway} ในระบบครับ`;
                 }
 
-                const dangerReports = highwayReports.filter(function(report) {
-                    return normalizeStatus(report.status) === 'danger';
-                });
+                const dangerReports = highwayReports.filter(
+                    function(report) {
+                        return normalizeStatus(report.status) === 'danger';
+                    }
+                );
 
-                let answer = `ทางหลวง ${highway} มีรายงาน ${highwayReports.length} จุด\n`;
+                let answer =
+                    `ทางหลวง ${highway} มีรายงาน ${highwayReports.length} จุด\n`;
 
                 if (dangerReports.length) {
-                    answer += `⚠️ พบจุดเสี่ยงอันตรายสูง ${dangerReports.length} จุด\n`;
+                    answer +=
+                        `⚠️ พบจุดเสี่ยงอันตรายสูง ${dangerReports.length} จุด\n`;
                 }
 
-                highwayReports.slice(0, 4).forEach(function(report, index) {
-                    answer += `\n${index + 1}. กม.${report.km} ${report.landmark}\n`;
-                    answer += `   สถานะ: ${report.statusText}\n`;
+                highwayReports.slice(0, 4).forEach(
+                    function(report, index) {
+                        answer +=
+                            `\n${index + 1}. กม.${report.km} ${report.landmark}\n` +
+                            `   สถานะ: ${report.statusText}\n`;
 
-                    if (report.alternative) {
-                        answer += `   ทางเลี่ยง: ${report.alternative}\n`;
+                        if (report.alternative) {
+                            answer +=
+                                `   ทางเลี่ยง: ${report.alternative}\n`;
+                        }
                     }
-                });
+                );
 
                 return answer;
             }
@@ -2625,41 +2808,78 @@
                     return normalizeStatus(report.status) === 'danger';
                 });
 
-                if (!dangerReports.length) {
+                if (dangerReports.length === 0) {
                     return 'ขณะนี้ยังไม่พบรายงานจุดเสี่ยงอันตรายสูงในระบบครับ';
                 }
 
-                return `พบจุดเสี่ยงอันตรายสูง ${dangerReports.length} จุด\n\n` +
+                return (
+                    `พบจุดเสี่ยงอันตรายสูง ${dangerReports.length} จุด\n\n` +
                     dangerReports.slice(0, 5).map(function(report, index) {
-                        return `${index + 1}. ทล.${report.highway} กม.${report.km} — ${report.landmark} (${report.province})`;
-                    }).join('\n');
+                        return (
+                            `${index + 1}. ทล.${report.highway} ` +
+                            `กม.${report.km} — ${report.landmark} ` +
+                            `(${report.province})`
+                        );
+                    }).join('\n')
+                );
             }
 
             if (q.includes('ทางเลี่ยง') || q.includes('เลี่ยง')) {
-                const withAlternative = reports.filter(function(report) {
-                    return report.alternative;
-                });
+                const reportsWithAlternative = reports.filter(
+                    function(report) {
+                        return report.alternative;
+                    }
+                );
 
-                if (!withAlternative.length) {
+                if (reportsWithAlternative.length === 0) {
                     return 'ยังไม่มีข้อมูลเส้นทางเลี่ยงในระบบครับ';
                 }
 
-                return 'เส้นทางเลี่ยงที่มีข้อมูลในระบบ:\n\n' +
-                    withAlternative.slice(0, 5).map(function(report, index) {
-                        return `${index + 1}. ทล.${report.highway} กม.${report.km}: ${report.alternative}`;
-                    }).join('\n');
+                return (
+                    'เส้นทางเลี่ยงที่มีข้อมูลในระบบ:\n\n' +
+                    reportsWithAlternative.slice(0, 5).map(
+                        function(report, index) {
+                            return (
+                                `${index + 1}. ทล.${report.highway} ` +
+                                `กม.${report.km}: ${report.alternative}`
+                            );
+                        }
+                    ).join('\n')
+                );
             }
 
-            if (matched.length) {
-                return matched.slice(0, 4).map(function(report, index) {
-                    return `${index + 1}. ทล.${report.highway} กม.${report.km}\n` +
-                        `สถานะ: ${report.statusText}\n` +
-                        `พื้นที่: ${report.district}, ${report.province}\n` +
-                        `ทางเลี่ยง: ${report.alternative || 'ยังไม่ระบุ'}`;
-                }).join('\n\n');
+            const matchedReports = reports.filter(function(report) {
+                return [
+                    report.highway,
+                    report.province,
+                    report.district,
+                    report.landmark
+                ].join(' ').toLowerCase().includes(
+                    q.replace(/[?]/g, '').trim()
+                );
+            });
+
+            if (matchedReports.length) {
+                return matchedReports.slice(0, 4).map(
+                    function(report, index) {
+                        return (
+                            `${index + 1}. ทล.${report.highway} ` +
+                            `กม.${report.km}\n` +
+                            `สถานะ: ${report.statusText}\n` +
+                            `พื้นที่: ${report.district}, ${report.province}\n` +
+                            `ทางเลี่ยง: ${report.alternative || 'ยังไม่ระบุ'}`
+                        );
+                    }
+                ).join('\n\n');
             }
 
-            return 'ลองสอบถามด้วยหมายเลขทางหลวง จังหวัด อำเภอ หรือคำว่า “ถนนทรุด” และ “ทางเลี่ยง” เช่น\n• ทางหลวง 304 ผ่านได้ไหม\n• มีจุดถนนทรุดที่ไหนบ้าง\n• ทางเลี่ยงไปสระแก้ว';
+            return (
+                'ลองสอบถามด้วยหมายเลขทางหลวง จังหวัด อำเภอ ' +
+                'หรือคำว่า “ถนนทรุด” และ “ทางเลี่ยง” เช่น\n' +
+                '• ทางหลวง 304 ผ่านได้ไหม\n' +
+                '• มีจุดถนนทรุดที่ไหนบ้าง\n' +
+                '• ทางเลี่ยงไปสระแก้ว'
+            );
         }
     </script>
 </body>
